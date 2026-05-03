@@ -1,126 +1,170 @@
-import { useEffect, useRef, useState, useCallback } from "react";
-import { usePlayerStore, type DjMessage } from "../stores/playerStore";
+import { useEffect, useRef } from "react";
+import { useChatStore, type ChatMessage, type RecommendedSong } from "../stores/chatStore";
+import { usePlayerStore } from "../stores/playerStore";
+import type { QueueItem } from "../api/client";
 
-export interface ChatMessage {
-  id: string;
-  role: "user" | "ai" | "dj";
-  text: string;
-  ts: number;
-}
+export default function ChatArea() {
+    const { messages, streamingText, streamingSongs, isStreaming, error } = useChatStore();
+    const containerRef = useRef<HTMLDivElement>(null);
+    const bottomRef = useRef<HTMLDivElement>(null);
 
-interface Props {
-  messages: ChatMessage[];
-  streamingText: string;
-}
+    // Auto-scroll to bottom
+    useEffect(() => {
+        bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [messages, streamingText, streamingSongs]);
 
-export default function ChatArea({ messages, streamingText }: Props) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const bottomRef = useRef<HTMLDivElement>(null);
-  const djMessages = usePlayerStore((s) => s.djMessages);
+    return (
+        <div className="chat-area">
+            <div className="chat-messages" ref={containerRef}>
+                {messages.length === 0 && !streamingText && (
+                    <div className="chat-welcome">
+                        <div className="chat-welcome-avatar">🎵</div>
+                        <div className="chat-welcome-title">Hey, 我是 Claudio</div>
+                        <div className="chat-welcome-desc">
+                            你的私人 AI 音乐助手，告诉我你现在想听什么～
+                        </div>
+                        <div className="chat-welcome-hints">
+                            <ChatHint text="来点轻松的音乐" />
+                            <ChatHint text="推荐几首适合写代码的歌" />
+                            <ChatHint text="今天心情不太好，想听点治愈的" />
+                            <ChatHint text="来点周杰伦的歌" />
+                        </div>
+                    </div>
+                )}
 
-  // Auto-scroll to bottom
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, streamingText, djMessages]);
+                {messages.map((msg) => (
+                    <ChatBubble key={msg.id} message={msg} />
+                ))}
 
-  return (
-    <div className="chat-area">
-      <div className="chat-messages" ref={containerRef}>
-        {messages.length === 0 && !streamingText && (
-          <div className="chat-welcome">
-            <div className="chat-welcome-icon">AI</div>
-            <div className="chat-welcome-title">Claudio</div>
-            <div className="chat-welcome-desc">
-              Tell me what you want to listen to, and I'll create a playlist for you.
+                {/* Streaming AI response */}
+                {isStreaming && (streamingText || streamingSongs.length > 0) && (
+                    <div className="chat-bubble ai">
+                        <div className="chat-avatar ai">🎵</div>
+                        <div className="chat-content">
+                            {streamingText && (
+                                <div className="chat-text streaming">
+                                    {streamingText}
+                                    <span className="stream-cursor">▊</span>
+                                </div>
+                            )}
+                            {streamingSongs.length > 0 && (
+                                <div className="song-cards">
+                                    {streamingSongs.map((song, i) => (
+                                        <SongCard key={song.id} song={song} index={i} isStreaming />
+                                    ))}
+                                    <div className="song-cards-loading">正在搜索更多歌曲...</div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
+
+                {/* Error message */}
+                {error && (
+                    <div className="chat-bubble system-error">
+                        <div className="chat-text">⚠️ {error}</div>
+                    </div>
+                )}
+
+                <div ref={bottomRef} />
             </div>
-            <div className="chat-welcome-hints">
-              <span className="chat-hint">Try: "play some coding music"</span>
-              <span className="chat-hint">Try: "relaxing piano for studying"</span>
-              <span className="chat-hint">Try: "upbeat pop songs"</span>
-            </div>
-          </div>
-        )}
-
-        {messages.map((msg) => (
-          <ChatBubble key={msg.id} message={msg} />
-        ))}
-
-        {djMessages.map((msg) => (
-          <DjBubble key={msg.id} message={msg} />
-        ))}
-
-        {streamingText && (
-          <div className="chat-bubble ai streaming">
-            <div className="chat-avatar">AI</div>
-            <div className="chat-content">
-              <StreamingText text={streamingText} />
-            </div>
-          </div>
-        )}
-
-        <div ref={bottomRef} />
-      </div>
-    </div>
-  );
+        </div>
+    );
 }
 
 function ChatBubble({ message }: { message: ChatMessage }) {
-  const isUser = message.role === "user";
-  return (
-    <div className={`chat-bubble ${message.role}`}>
-      {!isUser && <div className="chat-avatar">AI</div>}
-      <div className="chat-content">
-        <div className="chat-text">{message.text}</div>
-      </div>
-      {isUser && <div className="chat-avatar user">U</div>}
-    </div>
-  );
+    const isUser = message.role === "user";
+    const isDj = message.role === "dj";
+
+    return (
+        <div className={`chat-bubble ${message.role}`}>
+            {isUser ? (
+                <>
+                    <div className="chat-content">
+                        <div className="chat-text">{message.text}</div>
+                    </div>
+                    <div className="chat-avatar user">U</div>
+                </>
+            ) : isDj ? (
+                <>
+                    <div className="chat-avatar dj">🎧</div>
+                    <div className="chat-content">
+                        <div className="chat-text">{message.text}</div>
+                    </div>
+                </>
+            ) : (
+                <>
+                    <div className="chat-avatar ai">🎵</div>
+                    <div className="chat-content">
+                        <div className="chat-text">{message.text}</div>
+                        {message.songs && message.songs.length > 0 && (
+                            <div className="song-cards">
+                                {message.songs.map((song, i) => (
+                                    <SongCard key={song.id} song={song} index={i} />
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </>
+            )}
+        </div>
+    );
 }
 
-function DjBubble({ message }: { message: DjMessage }) {
-  return (
-    <div className="chat-bubble dj">
-      <div className="chat-avatar dj">DJ</div>
-      <div className="chat-content">
-        <div className="chat-text">{message.text}</div>
-      </div>
-    </div>
-  );
+function ChatHint({ text }: { text: string }) {
+    const send = useChatStore((s) => s.send);
+    const isStreaming = useChatStore((s) => s.isStreaming);
+
+    return (
+        <button
+            className="chat-hint"
+            onClick={() => send(text)}
+            disabled={isStreaming}
+        >
+            {text}
+        </button>
+    );
 }
 
-function StreamingText({ text }: { text: string }) {
-  const [displayed, setDisplayed] = useState("");
-  const indexRef = useRef(0);
+function SongCard({ song, index, isStreaming }: { song: RecommendedSong; index: number; isStreaming?: boolean }) {
+    const playItem = usePlayerStore((s) => s.playItem);
 
-  useEffect(() => {
-    indexRef.current = 0;
-    setDisplayed("");
-  }, [text]);
+    const handleClick = () => {
+        if (!song.audioUrl) return;
+        const item: QueueItem = {
+            id: song.id,
+            type: "song",
+            songId: song.songId,
+            title: song.title,
+            artist: song.artist,
+            coverUrl: song.coverUrl,
+            audioUrl: song.audioUrl,
+            status: "pending",
+        };
+        playItem(item);
+    };
 
-  useEffect(() => {
-    if (indexRef.current >= text.length) return;
-
-    const timer = setInterval(() => {
-      const chars = Array.from(text);
-      if (indexRef.current < chars.length) {
-        const chunkSize = Math.min(
-          Math.floor(Math.random() * 2) + 1,
-          chars.length - indexRef.current
-        );
-        indexRef.current += chunkSize;
-        setDisplayed(chars.slice(0, indexRef.current).join(""));
-      } else {
-        clearInterval(timer);
-      }
-    }, 60);
-
-    return () => clearInterval(timer);
-  }, [text]);
-
-  return (
-    <div className="chat-streaming">
-      {displayed}
-      <span className="stream-cursor">|</span>
-    </div>
-  );
+    return (
+        <div
+            className={`song-card ${isStreaming ? "streaming" : ""}`}
+            style={{ animationDelay: `${index * 80}ms` }}
+            onClick={handleClick}
+        >
+            <div className="song-card-cover">
+                {song.coverUrl ? (
+                    <img src={song.coverUrl} alt={song.title} loading="lazy" />
+                ) : (
+                    <div className="song-card-cover-placeholder">♫</div>
+                )}
+                <div className="song-card-play-overlay">▶</div>
+            </div>
+            <div className="song-card-info">
+                <div className="song-card-title">{song.title}</div>
+                <div className="song-card-artist">{song.artist}</div>
+                {song.reason && (
+                    <div className="song-card-reason">💡 {song.reason}</div>
+                )}
+            </div>
+        </div>
+    );
 }

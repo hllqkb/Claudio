@@ -5,7 +5,7 @@ import AudioSpectrum from "../components/AudioSpectrum";
 import KaraokeLyrics from "../components/KaraokeLyrics";
 import WaveformBar from "../components/WaveformBar";
 import IntentInput from "../components/IntentInput";
-import ChatArea, { type ChatMessage } from "../components/ChatArea";
+import ChatArea from "../components/ChatArea";
 import QueueList from "../components/QueueList";
 import AudioVisualizer from "../components/AudioVisualizer";
 import SearchPanel from "../components/SearchPanel";
@@ -32,8 +32,6 @@ export default function PlayerPage() {
   } = usePlayerStore();
   const { t } = useI18n();
 
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
-  const [streamingText, setStreamingText] = useState("");
   const [visualMode, setVisualMode] = useState<ModeKey>("Glob");
   const [showExtras, setShowExtras] = useState(false);
 
@@ -97,26 +95,6 @@ export default function PlayerPage() {
   }, [dragging, getSeekMs]);
 
   const displayProgressMs = dragging ? dragProgress : progressMs;
-
-  const handleUserMessage = useCallback((text: string) => {
-    setChatMessages((prev) => [
-      ...prev,
-      { id: `user_${Date.now()}`, role: "user", text, ts: Date.now() },
-    ]);
-  }, []);
-
-  const handleAiResponse = useCallback((text: string) => {
-    setStreamingText(text);
-    const chars = Array.from(text);
-    const duration = chars.length * 60 + 1500;
-    setTimeout(() => {
-      setStreamingText("");
-      setChatMessages((prev) => [
-        ...prev,
-        { id: `ai_${Date.now()}`, role: "ai", text, ts: Date.now() },
-      ]);
-    }, duration);
-  }, []);
 
   const handleSavePlaylist = async () => {
     if (!playlistName.trim()) return;
@@ -238,8 +216,8 @@ export default function PlayerPage() {
 
       {/* Chat / AI Conversation */}
       <div className="chat-section">
-        <ChatArea messages={chatMessages} streamingText={streamingText} />
-        <IntentInput onResponse={handleAiResponse} onUserMessage={handleUserMessage} />
+        <ChatArea />
+        <IntentInput />
       </div>
 
       {/* Search Panel */}
