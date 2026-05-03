@@ -4,6 +4,20 @@
 
 Claudio 是一个本地化的 AI 音乐电台系统。导入网易云歌单后，Claude AI 根据你的口味、天气、日程和实时指令生成播放计划与 DJ 串词，再通过 TTS 合成语音播报，带来沉浸式电台体验。
 
+## 截图
+
+| 播放器 | 个人主页 |
+|:---:|:---:|
+| ![播放器](docs/images/screenshot-1.png) | ![个人主页](docs/images/screenshot-2.png) |
+
+| 歌单浏览 | 设置 |
+|:---:|:---:|
+| ![歌单浏览](docs/images/screenshot-3.png) | ![设置](docs/images/screenshot-4.png) |
+
+| 音频可视化 |
+|:---:|
+| ![音频可视化](docs/images/screenshot-5.png) |
+
 ## 特性
 
 - **个性化推荐** — 基于歌单、口味规则、情绪规则和播放历史生成推荐
