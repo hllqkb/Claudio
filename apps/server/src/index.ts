@@ -33,6 +33,8 @@ import { MockUpnpService } from "./services/upnp.service.js";
 import { MockSchedulerService, CronSchedulerService } from "./services/scheduler.service.js";
 import { ContextService } from "./services/context.service.js";
 import { PlaylistService } from "./services/playlist.service.js";
+import fastifyStatic from "@fastify/static";
+import { existsSync } from "node:fs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const config = loadConfig();
@@ -113,6 +115,24 @@ await app.register(coverRoutes);
 await app.register(searchRoutes);
 await app.register(queueRoutes);
 await app.register(chatRoutes);
+
+// Serve frontend static files (SPA fallback)
+const webDist = join(__dirname, "../../web/dist");
+if (existsSync(webDist)) {
+  await app.register(fastifyStatic, {
+    root: webDist,
+    prefix: "/",
+    decorateReply: false,
+  });
+  // SPA fallback: any non-API GET that doesn't match a static file returns index.html
+  app.setNotFoundHandler((req, reply) => {
+    if (req.method === "GET" && !req.url.startsWith("/api/") && !req.url.startsWith("/ws/")) {
+      return reply.type("text/html").sendFile("index.html");
+    }
+    reply.status(404).send({ message: "Route " + req.method + ":" + req.url + " not found", error: "Not Found", statusCode: 404 });
+  });
+  console.log(`[server] serving frontend from ${webDist}`);
+}
 
 async function start() {
   try {
