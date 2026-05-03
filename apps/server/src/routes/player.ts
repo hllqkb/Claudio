@@ -1,6 +1,13 @@
 import type { FastifyInstance } from "fastify";
 import { broadcast } from "./stream.js";
-import { recordPlay, upsertSong } from "../db/plays.repo.js";
+import {
+  recordPlay,
+  upsertSong,
+  getRecentPlays,
+  getFavorites,
+  addFavorite,
+  removeFavorite,
+} from "../db/plays.repo.js";
 
 let isPlaying = true;
 let currentIndex = 0;
@@ -88,5 +95,33 @@ export async function playerRoutes(app: FastifyInstance) {
     }
 
     return { ok: true };
+  });
+
+  // Play history
+  app.get("/api/plays/recent", async (request) => {
+    const { limit } = request.query as { limit?: string };
+    const plays = getRecentPlays(limit ? parseInt(limit, 10) : 50);
+    return { plays };
+  });
+
+  // Favorites
+  app.get("/api/favorites", async () => {
+    const favorites = getFavorites();
+    return { favorites };
+  });
+
+  app.post("/api/favorites", async (request) => {
+    const body = request.body as { songId: string; title?: string; artist?: string; coverUrl?: string };
+    if (!body.songId) {
+      return { ok: false, error: "songId is required" };
+    }
+    addFavorite(body.songId, body.title, body.artist, body.coverUrl);
+    return { ok: true };
+  });
+
+  app.delete("/api/favorites/:songId", async (request) => {
+    const { songId } = request.params as { songId: string };
+    const removed = removeFavorite(songId);
+    return { ok: removed };
   });
 }

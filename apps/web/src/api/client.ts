@@ -83,6 +83,25 @@ export interface HealthResponse {
     services: Record<string, string>;
 }
 
+export interface RecentPlay {
+    id: string;
+    songId: string | null;
+    title: string | null;
+    artist: string | null;
+    coverUrl: string | null;
+    scene: string | null;
+    action: string;
+    createdAt: string;
+}
+
+export interface FavoriteItem {
+    songId: string;
+    title: string | null;
+    artist: string | null;
+    coverUrl: string | null;
+    createdAt: string;
+}
+
 export interface StreamChatCallbacks {
     onChunk?: (text: string) => void;
     onPlan?: (plan: { scene: string; summary: string; itemCount: number; songCount: number }) => void;
@@ -236,4 +255,12 @@ export const api = {
         ),
     reportPlay: (body: { songId?: string; title?: string; artist?: string; coverUrl?: string; durationMs?: number; scene?: string }) =>
         fetch("/api/plays/report", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }),
+
+    getRecentPlays: (limit?: number) =>
+        request<{ plays: RecentPlay[] }>(`/api/plays/recent${limit ? `?limit=${limit}` : ""}`),
+    getFavorites: () => request<{ favorites: FavoriteItem[] }>("/api/favorites"),
+    addFavorite: (body: { songId: string; title?: string; artist?: string; coverUrl?: string }) =>
+        request<{ ok: boolean }>("/api/favorites", { method: "POST", body: JSON.stringify(body) }),
+    removeFavorite: (songId: string) =>
+        request<{ ok: boolean }>(`/api/favorites/${encodeURIComponent(songId)}`, { method: "DELETE" }),
 };

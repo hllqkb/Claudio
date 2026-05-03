@@ -5,6 +5,7 @@ import { useKeyboard } from "./hooks/useKeyboard";
 import ToastContainer, { ShortcutHintBar } from "./components/Toast";
 import MiniPlayer from "./components/MiniPlayer";
 import PlayerPage from "./pages/PlayerPage";
+import HistoryPage from "./pages/HistoryPage";
 import SettingsPage from "./pages/SettingsPage";
 import ProfilePage from "./pages/ProfilePage";
 import PlaylistPage from "./pages/PlaylistPage";
@@ -22,6 +23,7 @@ export default function App() {
   const navItems = [
     { path: "/", label: t("navHome") },
     { path: "/playlists", label: t("navPlaylists") },
+    { path: "/history", label: t("navHistory") },
     { path: "/profile", label: t("navProfile") },
     { path: "/settings", label: t("navSettings") },
   ];
@@ -120,6 +122,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<PlayerPage />} />
           <Route path="/playlists" element={<PlaylistPage />} />
+          <Route path="/history" element={<HistoryPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/settings" element={<SettingsPage />} />
         </Routes>

@@ -78,3 +78,12 @@ CREATE TABLE IF NOT EXISTS playlist_items (
   sort_order INTEGER NOT NULL,
   FOREIGN KEY (playlist_id) REFERENCES playlists(id) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS favorites (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  song_id TEXT NOT NULL UNIQUE,
+  title TEXT,
+  artist TEXT,
+  cover_url TEXT,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);

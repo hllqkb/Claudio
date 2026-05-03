@@ -70,6 +70,80 @@ export function getMoodPreference(): Record<string, number> {
   return result;
 }
 
+export function getRecentPlays(limit = 50): Array<{
+  id: string;
+  songId: string | null;
+  title: string | null;
+  artist: string | null;
+  coverUrl: string | null;
+  scene: string | null;
+  action: string;
+  createdAt: string;
+}> {
+  const rows = getDb()
+    .prepare(
+      `SELECT p.id, p.song_id as songId, s.title, s.artist, s.cover_url as coverUrl,
+              p.scene, p.action, p.created_at as createdAt
+       FROM plays p LEFT JOIN songs s ON p.song_id = s.id
+       ORDER BY p.created_at DESC LIMIT ?`
+    )
+    .all(limit) as Array<{
+      id: string;
+      songId: string | null;
+      title: string | null;
+      artist: string | null;
+      coverUrl: string | null;
+      scene: string | null;
+      action: string;
+      createdAt: string;
+    }>;
+  return rows;
+}
+
+export function getFavorites(): Array<{
+  songId: string;
+  title: string | null;
+  artist: string | null;
+  coverUrl: string | null;
+  createdAt: string;
+}> {
+  const rows = getDb()
+    .prepare(
+      `SELECT song_id as songId, title, artist, cover_url as coverUrl, created_at as createdAt
+       FROM favorites ORDER BY created_at DESC`
+    )
+    .all() as Array<{
+      songId: string;
+      title: string | null;
+      artist: string | null;
+      coverUrl: string | null;
+      createdAt: string;
+    }>;
+  return rows;
+}
+
+export function addFavorite(songId: string, title?: string, artist?: string, coverUrl?: string): void {
+  getDb()
+    .prepare(
+      `INSERT OR IGNORE INTO favorites (song_id, title, artist, cover_url) VALUES (?, ?, ?, ?)`
+    )
+    .run(songId, title ?? null, artist ?? null, coverUrl ?? null);
+}
+
+export function removeFavorite(songId: string): boolean {
+  const result = getDb()
+    .prepare("DELETE FROM favorites WHERE song_id = ?")
+    .run(songId);
+  return result.changes > 0;
+}
+
+export function isFavorite(songId: string): boolean {
+  const row = getDb()
+    .prepare("SELECT 1 FROM favorites WHERE song_id = ?")
+    .get(songId);
+  return !!row;
+}
+
 export function getPlayStats(): { totalPlays: number; uniqueSongs: number; uniqueArtists: number } {
   const row = getDb()
     .prepare(

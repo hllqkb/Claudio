@@ -31,6 +31,7 @@ export default function PlayerPage() {
     fetchNow, playItem, userActionPlay,
     shuffle, repeatMode, toggleShuffle, cycleRepeat,
     lastError, clearError,
+    favoriteIds, loadFavorites, toggleFavorite,
   } = usePlayerStore();
   const { t } = useI18n();
 
@@ -51,9 +52,10 @@ export default function PlayerPage() {
 
   useEffect(() => {
     fetchNow().finally(() => setInitialLoaded(true));
+    loadFavorites();
     wsClient.connect();
     return () => wsClient.disconnect();
-  }, [fetchNow]);
+  }, [fetchNow, loadFavorites]);
 
   const statusText =
     djStatus === "idle" ? t("idle")
@@ -160,7 +162,17 @@ export default function PlayerPage() {
         </div>
 
         <div className="player-lower">
-          <div className="song-title">{nowPlaying?.title ?? t("notPlaying")}</div>
+          <div className="song-title-row">
+            <div className="song-title">{nowPlaying?.title ?? t("notPlaying")}</div>
+            {nowPlaying?.songId && (
+              <button
+                className={`fav-btn ${favoriteIds.has(nowPlaying.songId) ? "active" : ""}`}
+                onClick={() => toggleFavorite(nowPlaying.songId!, nowPlaying.title, nowPlaying.artist, nowPlaying.coverUrl)}
+              >
+                {favoriteIds.has(nowPlaying.songId) ? "❤️" : "🤍"}
+              </button>
+            )}
+          </div>
           <div className="song-artist">{nowPlaying?.artist ?? (scene ? `${scene}` : "")}</div>
 
           {needsUserAction && (

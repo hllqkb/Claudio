@@ -6,6 +6,7 @@ export const translations = {
 
     // Navigation
     navHome: "Home",
+    navHistory: "History",
     navProfile: "Profile",
     navSettings: "Settings",
 
@@ -99,6 +100,7 @@ export const translations = {
 
     // Navigation
     navHome: "首页",
+    navHistory: "历史",
     navProfile: "品味",
     navSettings: "设置",
 
