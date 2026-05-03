@@ -1,0 +1,85 @@
+import { getDb } from "./db.js";
+
+export function recordPlay(data: {
+  id: string;
+  itemId: string;
+  itemType: string;
+  songId?: string;
+  action: string;
+  scene?: string;
+}): void {
+  const now = new Date().toISOString();
+  getDb()
+    .prepare(
+      "INSERT INTO plays (id, item_id, item_type, song_id, action, scene, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)"
+    )
+    .run(data.id, data.itemId, data.itemType, data.songId ?? null, data.action, data.scene ?? null, now);
+}
+
+export function upsertSong(data: {
+  id: string;
+  title: string;
+  artist?: string;
+  album?: string;
+  coverUrl?: string;
+  durationMs?: number;
+}): void {
+  const now = new Date().toISOString();
+  getDb()
+    .prepare(
+      `INSERT INTO songs (id, source, title, artist, album, cover_url, duration_ms, updated_at)
+       VALUES (?, 'ncm', ?, ?, ?, ?, ?, ?)
+       ON CONFLICT(id) DO UPDATE SET title = excluded.title, artist = excluded.artist, cover_url = excluded.cover_url, duration_ms = excluded.duration_ms, updated_at = excluded.updated_at`
+    )
+    .run(data.id, data.title, data.artist ?? null, data.album ?? null, data.coverUrl ?? null, data.durationMs ?? null, now);
+}
+
+export function getTopArtists(limit = 10): Array<{ name: string; count: number }> {
+  const rows = getDb()
+    .prepare(
+      `SELECT s.artist as name, COUNT(*) as count
+       FROM plays p JOIN songs s ON p.song_id = s.id
+       WHERE p.action = 'play' AND s.artist IS NOT NULL AND s.artist != ''
+       GROUP BY s.artist ORDER BY count DESC LIMIT ?`
+    )
+    .all(limit) as Array<{ name: string; count: number }>;
+  return rows;
+}
+
+export function getRecentThemes(limit = 5): string[] {
+  const rows = getDb()
+    .prepare(
+      "SELECT input FROM plans WHERE input IS NOT NULL AND input != '' ORDER BY created_at DESC LIMIT ?"
+    )
+    .all(limit) as Array<{ input: string }>;
+  return rows.map((r) => r.input);
+}
+
+export function getMoodPreference(): Record<string, number> {
+  const rows = getDb()
+    .prepare(
+      `SELECT scene, COUNT(*) as count FROM plays
+       WHERE action = 'play' AND scene IS NOT NULL AND scene != ''
+       GROUP BY scene ORDER BY count DESC`
+    )
+    .all() as Array<{ scene: string; count: number }>;
+  const result: Record<string, number> = {};
+  for (const row of rows) {
+    result[row.scene] = row.count;
+  }
+  return result;
+}
+
+export function getPlayStats(): { totalPlays: number; uniqueSongs: number; uniqueArtists: number } {
+  const row = getDb()
+    .prepare(
+      `SELECT
+         COUNT(*) as totalPlays,
+         COUNT(DISTINCT p.song_id) as uniqueSongs,
+         COUNT(DISTINCT s.artist) as uniqueArtists
+       FROM plays p LEFT JOIN songs s ON p.song_id = s.id
+       WHERE p.action = 'play'`
+    )
+    .get() as { totalPlays: number; uniqueSongs: number; uniqueArtists: number };
+  return row;
+}

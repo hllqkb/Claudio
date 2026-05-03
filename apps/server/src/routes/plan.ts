@@ -1,6 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
-import type { PlanItem } from "../services/claude.service.js";
+import { enrichPlanItems } from "../helpers/plan-enrich.js";
 
 const PlanRequestSchema = z.object({
   trigger: z.enum(["manual", "auto", "scheduled"]).default("manual"),
@@ -13,7 +13,7 @@ const PlanRequestSchema = z.object({
 export async function planRoutes(app: FastifyInstance) {
   app.post("/api/plan", async (request) => {
     const body = PlanRequestSchema.parse(request.body);
-    const { claude, context } = app.services;
+    const { claude, context, ncm, tts } = app.services;
 
     const contextStr = await context.buildContext(body.input, body.scene);
     const plan = await claude.generatePlan(
@@ -28,33 +28,7 @@ export async function planRoutes(app: FastifyInstance) {
     );
 
     const planId = `plan_${Date.now()}`;
-    const { ncm } = app.services;
-
-    const items = [];
-    for (let i = 0; i < plan.items.length; i++) {
-      const item = plan.items[i];
-      const baseItem = {
-        ...item,
-        id: `${planId}_${i}`,
-        audioUrl: item.audioUrl ?? "",
-        status: "pending" as const,
-      };
-
-      if (item.type === "song" && item.query) {
-        const songs = await ncm.search(item.query, 1);
-        if (songs.length > 0) {
-          const song = songs[0];
-          baseItem.songId = song.id;
-          baseItem.title = song.title;
-          baseItem.artist = song.artist;
-          baseItem.coverUrl = song.coverUrl;
-          // Use audio proxy endpoint instead of direct CDN URL
-          baseItem.audioUrl = `/api/audio?id=${encodeURIComponent(song.id)}&title=${encodeURIComponent(song.title)}&artist=${encodeURIComponent(song.artist)}`;
-        }
-      }
-
-      items.push(baseItem);
-    }
+    const items = await enrichPlanItems(ncm, tts, plan.items, planId);
 
     return {
       planId,

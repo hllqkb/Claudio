@@ -1,42 +1,8 @@
-# Dependencies
-node_modules/
-.pnpm-store/
-
-# Build output
-dist/
-build/
-.tscache/
-
-# Environment
+node_modules
+dist
 .env
 .env.local
-.env.*.local
-
-# Database
 *.sqlite
-*.sqlite-shm
-*.sqlite-wal
 data/
-
-# Cache
 cache/
-.vite/
-.vite-temp/
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Logs
-*.log
-logs/
-
-# Claude Code
-.claude/
+.vite

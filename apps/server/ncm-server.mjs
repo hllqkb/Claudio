@@ -139,7 +139,7 @@ const server = http.createServer(async (req, res) => {
       // Try NCM first - use eapi endpoint for better URL compatibility
       let data = await ncmPost("/weapi/song/enhance/player/url/v1", {
         ids: [id],
-        level: "standard",
+        level: "exhigh",
         encodeType: "mp3",
         br: Number(br),
       });
@@ -171,12 +171,32 @@ const server = http.createServer(async (req, res) => {
       res.end(JSON.stringify(data));
     } else if (url.pathname === "/lyric") {
       const id = url.searchParams.get("id") ?? "";
-      const data = await ncmGet("/api/song/lyric", { id, lv: 1, tv: 1 });
+      const data = await ncmGet("/api/song/lyric", { id, lv: 1, tv: 1, yrc: 1 });
       res.end(JSON.stringify(data));
     } else if (url.pathname === "/playlist/detail") {
       const id = url.searchParams.get("id") ?? "";
       const data = await ncmPost("/weapi/v6/playlist/detail", { id, n: 100000, s: 8 });
       res.end(JSON.stringify({ playlist: { tracks: (data?.playlist?.tracks ?? []).map(mapSong) } }));
+    } else if (url.pathname === "/user/playlist") {
+      const uid = url.searchParams.get("uid") ?? "";
+      const limit = Number(url.searchParams.get("limit") ?? "50");
+      try {
+        const data = await ncmPost("/weapi/user/playlist", { uid, limit, offset: 0 });
+        console.log("[ncm] user/playlist response status:", data?.code);
+        const playlists = (data?.playlist ?? []).map((p) => ({
+          id: String(p.id),
+          name: p.name ?? "",
+          coverUrl: p.coverImgUrl ?? p.picUrl ?? "",
+          trackCount: p.trackCount ?? 0,
+          creator: p.creator?.nickname ?? "",
+          description: p.description ?? "",
+        }));
+        res.end(JSON.stringify({ playlist: playlists }));
+      } catch (e) {
+        console.error("[ncm] user/playlist error:", e.message);
+        res.statusCode = 500;
+        res.end(JSON.stringify({ error: e.message }));
+      }
     } else if (url.pathname === "/recommend/songs") {
       const data = await ncmPost("/weapi/v3/playlist/detail", { id: "3778678", n: 100000, s: 8 });
       res.end(JSON.stringify({ data: { dailySongs: (data?.playlist?.tracks ?? []).slice(0, 30).map(mapSong) } }));
@@ -190,7 +210,7 @@ const server = http.createServer(async (req, res) => {
       const br = url.searchParams.get("br") ?? "320000";
       let data = await ncmPost("/weapi/song/enhance/player/url/v1", {
         ids: [id],
-        level: "standard",
+        level: "exhigh",
         encodeType: "mp3",
         br: Number(br),
       });
@@ -268,6 +288,40 @@ const server = http.createServer(async (req, res) => {
         res.end();
       };
       await pump();
+    } else if (url.pathname === "/cover") {
+      // Cover image proxy - avoids CORS/mixed-content issues
+      const imgUrl = url.searchParams.get("url") ?? "";
+      if (!imgUrl || !imgUrl.startsWith("http")) {
+        res.statusCode = 400;
+        res.end(JSON.stringify({ error: "missing or invalid url" }));
+        return;
+      }
+      try {
+        const imgRes = await fetch(imgUrl, {
+          headers: { "User-Agent": AGENT, Referer: "https://music.163.com/" },
+        });
+        if (!imgRes.ok) {
+          res.statusCode = imgRes.status;
+          res.end(JSON.stringify({ error: `upstream ${imgRes.status}` }));
+          return;
+        }
+        res.setHeader("Content-Type", imgRes.headers.get("content-type") || "image/jpeg");
+        res.setHeader("Cache-Control", "public, max-age=86400");
+        res.setHeader("Access-Control-Allow-Origin", "*");
+        const reader = imgRes.body.getReader();
+        const pump = async () => {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            res.write(value);
+          }
+          res.end();
+        };
+        await pump();
+      } catch (e) {
+        res.statusCode = 500;
+        res.end(JSON.stringify({ error: e.message }));
+      }
     } else {
       res.statusCode = 404;
       res.end(JSON.stringify({ error: "not found" }));

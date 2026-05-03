@@ -37,6 +37,46 @@ export interface PlanResponse {
   items: QueueItem[];
 }
 
+export interface PlaylistItem {
+  id: string;
+  type: "song" | "tts";
+  songId?: string;
+  title?: string;
+  artist?: string;
+  coverUrl?: string;
+  audioUrl?: string;
+  text?: string;
+  reason?: string;
+}
+
+export interface Playlist {
+  id: string;
+  name: string;
+  description: string;
+  items: PlaylistItem[];
+  coverUrl?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface NcmPlaylistSummary {
+  id: string;
+  name: string;
+  coverUrl: string;
+  trackCount: number;
+  creator: string;
+  description: string;
+}
+
+export interface NcmTrack {
+  id: string;
+  title: string;
+  artist: string;
+  album: string;
+  coverUrl: string;
+  durationMs: number;
+}
+
 export interface HealthResponse {
   status: string;
   timestamp: string;
@@ -57,7 +97,7 @@ export const api = {
       body: JSON.stringify(body),
     }),
   postIntent: (text: string) =>
-    request<{ intent: string; planId: string; message: string }>("/api/intent", {
+    request<{ intent: string; planId: string; scene: string; summary: string; message: string; items: QueueItem[] }>("/api/intent", {
       method: "POST",
       body: JSON.stringify({ text }),
     }),
@@ -79,4 +119,18 @@ export const api = {
       moodPreference: Record<string, number>;
       recentThemes: string[];
     }>("/api/profile"),
+  getPlaylists: () => request<{ playlists: Playlist[] }>("/api/playlists"),
+  getPlaylist: (id: string) => request<{ playlist: Playlist }>(`/api/playlists/${id}`),
+  createPlaylist: (body: { name: string; description?: string; items: PlaylistItem[] }) =>
+    request<{ playlist: Playlist }>("/api/playlists", {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+  deletePlaylist: (id: string) =>
+    request<{ ok: boolean }>(`/api/playlists/${id}`, { method: "DELETE" }),
+  getNcmPlaylists: () => request<{ playlists: NcmPlaylistSummary[] }>("/api/ncm/playlists"),
+  getNcmPlaylistDetail: (id: string) => request<{ tracks: NcmTrack[] }>(`/api/ncm/playlists/${id}`),
+  getLyric: (songId: string) => request<{ lrc: string; tlyric?: string; yrc?: string }>(`/api/lyric?id=${encodeURIComponent(songId)}`),
+  reportPlay: (body: { songId?: string; title?: string; artist?: string; coverUrl?: string; durationMs?: number; scene?: string }) =>
+    fetch("/api/plays/report", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }),
 };

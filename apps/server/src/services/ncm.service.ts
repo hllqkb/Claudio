@@ -15,6 +15,7 @@ export interface SongUrlResult {
 export interface LyricResult {
   lrc: string;
   tlyric?: string;
+  yrc?: string;
 }
 
 export interface NcmService {
@@ -22,7 +23,17 @@ export interface NcmService {
   getSongUrl(songId: string, title?: string, artist?: string): Promise<SongUrlResult>;
   getLyric(songId: string): Promise<LyricResult>;
   getPlaylistDetail(playlistId: string): Promise<SongSearchResult[]>;
+  getUserPlaylists(): Promise<PlaylistSummary[]>;
   recommend(limit?: number): Promise<SongSearchResult[]>;
+}
+
+export interface PlaylistSummary {
+  id: string;
+  name: string;
+  coverUrl: string;
+  trackCount: number;
+  creator: string;
+  description: string;
 }
 
 export class MockNcmService implements NcmService {
@@ -46,7 +57,7 @@ export class MockNcmService implements NcmService {
   }
 
   async getLyric(songId: string): Promise<LyricResult> {
-    return { lrc: "[00:00.00]暂无歌词" };
+    return { lrc: "[00:00.00]暂无歌词", yrc: undefined };
   }
 
   async getPlaylistDetail(playlistId: string): Promise<SongSearchResult[]> {
@@ -56,12 +67,21 @@ export class MockNcmService implements NcmService {
   async recommend(limit = 10): Promise<SongSearchResult[]> {
     return this.search("推荐", limit);
   }
+
+  async getUserPlaylists(): Promise<PlaylistSummary[]> {
+    return [
+      { id: "mock_pl_1", name: "深夜编程", coverUrl: "", trackCount: 12, creator: "Claudio", description: "适合编码时听的音乐" },
+      { id: "mock_pl_2", name: "晨间冥想", coverUrl: "", trackCount: 8, creator: "Claudio", description: "安静的早晨旋律" },
+      { id: "mock_pl_3", name: "通勤路上", coverUrl: "", trackCount: 15, creator: "Claudio", description: "充满活力的通勤歌单" },
+    ];
+  }
 }
 
 export class NeteaseNcmService implements NcmService {
   constructor(
     private baseUrl: string,
-    private cookie?: string
+    private cookie?: string,
+    private uid?: string
   ) {}
 
   private async fetchJson<T>(path: string, params: Record<string, string> = {}): Promise<T> {
@@ -88,12 +108,14 @@ export class NeteaseNcmService implements NcmService {
   private mapSong(raw: any): SongSearchResult {
     const artists = raw.artists ?? raw.ar ?? [];
     const album = raw.album ?? raw.al ?? {};
+    const rawCover = album.picUrl ?? album.pic_url ?? "";
+    const coverUrl = rawCover ? `/api/cover?url=${encodeURIComponent(rawCover)}` : "";
     return {
       id: String(raw.id),
       title: raw.name ?? raw.title ?? "",
       artist: artists.map((a: any) => a.name).join(", "),
       album: album.name ?? "",
-      coverUrl: album.picUrl ?? album.pic_url ?? "",
+      coverUrl,
       durationMs: raw.duration ?? raw.dt ?? 0,
     };
   }
@@ -130,6 +152,7 @@ export class NeteaseNcmService implements NcmService {
       return {
         lrc: data?.lrc?.lyric ?? "[00:00.00]暂无歌词",
         tlyric: data?.tlyric?.lyric,
+        yrc: data?.yrc?.lyric,
       };
     } catch {
       return { lrc: "[00:00.00]暂无歌词" };
@@ -140,7 +163,42 @@ export class NeteaseNcmService implements NcmService {
     try {
       const data = await this.fetchJson<any>("/playlist/detail", { id: playlistId });
       const tracks = data?.playlist?.tracks ?? [];
-      return tracks.map((t: any) => this.mapSong(t));
+      return tracks.map((t: any) => {
+        // NCM server already mapped songs, just proxy the cover URL
+        if (t.coverUrl !== undefined) {
+          const rawCover = t.coverUrl ?? "";
+          return {
+            ...t,
+            coverUrl: rawCover ? `/api/cover?url=${encodeURIComponent(rawCover)}` : "",
+          };
+        }
+        return this.mapSong(t);
+      });
+    } catch {
+      return [];
+    }
+  }
+
+  async getUserPlaylists(): Promise<PlaylistSummary[]> {
+    if (!this.uid) return [];
+    try {
+      const data = await this.fetchJson<any>("/user/playlist", {
+        uid: this.uid,
+        limit: "50",
+      });
+      const playlists = data?.playlist ?? [];
+      return playlists.map((p: any) => {
+        const rawCover = p.coverUrl ?? p.coverImgUrl ?? p.picUrl ?? "";
+        const coverUrl = rawCover ? `/api/cover?url=${encodeURIComponent(rawCover)}` : "";
+        return {
+          id: String(p.id),
+          name: p.name ?? "",
+          coverUrl,
+          trackCount: p.trackCount ?? 0,
+          creator: p.creator?.nickname ?? p.creator ?? "",
+          description: p.description ?? "",
+        };
+      });
     } catch {
       return [];
     }

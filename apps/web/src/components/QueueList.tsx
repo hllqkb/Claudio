@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { QueueItem } from "../api/client";
 import { useI18n } from "../i18n/context";
 
@@ -24,22 +25,17 @@ export default function QueueList({ items, onItemClick }: Props) {
         <li
           key={item.id}
           className={`queue-item ${item.status}`}
+          style={{ animationDelay: `${Math.min(idx * 0.05, 0.5)}s` }}
           onClick={() => onItemClick?.(item)}
         >
           <span className="queue-index">{idx + 1}</span>
-          <span className="queue-type">
-            {item.type === "tts" ? (
-              <span style={{ color: "var(--mint)", fontSize: 10, fontWeight: 700 }}>
-                {t("djPrefix")}
-              </span>
-            ) : (
-              <span style={{ color: "var(--text-secondary)" }}>&#9835;</span>
-            )}
-          </span>
-          <span className="queue-title">
-            {item.type === "tts" ? item.text : item.title ?? "Unknown Track"}
-          </span>
-          {item.artist && <span className="queue-artist">{item.artist}</span>}
+          <CoverImage url={item.coverUrl} />
+          <div className="queue-info">
+            <span className="queue-title">
+              {item.type === "tts" ? item.text : item.title ?? "Unknown Track"}
+            </span>
+            {item.artist && <span className="queue-artist">{item.artist}</span>}
+          </div>
           <span className="queue-status">
             {item.status === "playing" && (
               <span className="eq-bars">
@@ -52,10 +48,29 @@ export default function QueueList({ items, onItemClick }: Props) {
                 ))}
               </span>
             )}
-            {item.status}
           </span>
         </li>
       ))}
     </ul>
+  );
+}
+
+function CoverImage({ url }: { url?: string }) {
+  const [error, setError] = useState(false);
+
+  if (!url || error) {
+    return (
+      <div className="queue-cover">
+        <div className="queue-cover-fallback">
+          <span>&#9835;</span>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="queue-cover">
+      <img src={url} alt="" loading="lazy" onError={() => setError(true)} />
+    </div>
   );
 }

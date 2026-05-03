@@ -3,6 +3,7 @@ import { useI18n } from "./i18n/context";
 import PlayerPage from "./pages/PlayerPage";
 import SettingsPage from "./pages/SettingsPage";
 import ProfilePage from "./pages/ProfilePage";
+import PlaylistPage from "./pages/PlaylistPage";
 
 export default function App() {
   const location = useLocation();
@@ -10,6 +11,7 @@ export default function App() {
 
   const navItems = [
     { path: "/", label: t("navHome") },
+    { path: "/playlists", label: t("navPlaylists") },
     { path: "/profile", label: t("navProfile") },
     { path: "/settings", label: t("navSettings") },
   ];
@@ -107,33 +109,11 @@ export default function App() {
       <main className="main-content">
         <Routes>
           <Route path="/" element={<PlayerPage />} />
+          <Route path="/playlists" element={<PlaylistPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/settings" element={<SettingsPage />} />
         </Routes>
       </main>
-
-      {/* Fluid animation keyframes */}
-      <style>{`
-        @keyframes fluidMove1 {
-          0%   { transform: translate(-22vmin, -14vmin) scale(1.00) rotate(0deg); }
-          20%  { transform: translate(8vmin, -22vmin) scale(1.10) rotate(40deg); }
-          40%  { transform: translate(24vmin, -4vmin) scale(0.95) rotate(80deg); }
-          60%  { transform: translate(14vmin, 18vmin) scale(1.12) rotate(120deg); }
-          80%  { transform: translate(-10vmin, 12vmin) scale(0.98) rotate(160deg); }
-          100% { transform: translate(-22vmin, -14vmin) scale(1.00) rotate(360deg); }
-        }
-        @keyframes fluidMove2 {
-          0%   { transform: translate(20vmin, 16vmin) scale(1.05) rotate(0deg); }
-          20%  { transform: translate(-12vmin, 22vmin) scale(0.94) rotate(-40deg); }
-          40%  { transform: translate(-26vmin, 2vmin) scale(1.14) rotate(-80deg); }
-          60%  { transform: translate(-10vmin, -18vmin) scale(0.92) rotate(-120deg); }
-          80%  { transform: translate(12vmin, -12vmin) scale(1.08) rotate(-160deg); }
-          100% { transform: translate(20vmin, 16vmin) scale(1.05) rotate(-360deg); }
-        }
-        @media (prefers-reduced-motion: reduce) {
-          div[style*="animation"] { animation-duration: 180s !important; }
-        }
-      `}</style>
     </div>
   );
 }

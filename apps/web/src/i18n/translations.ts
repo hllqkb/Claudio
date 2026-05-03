@@ -70,6 +70,23 @@ export const translations = {
 
     // Misc
     tasteLoaded: "taste.md loaded",
+
+    // Playlists
+    navPlaylists: "Playlists",
+    playlistsTitle: "Playlists",
+    emptyPlaylists: "No playlists yet",
+    playlistSongs: "songs",
+    playAll: "Play All",
+    deletePlaylist: "Delete",
+    confirmDelete: "Delete this playlist?",
+    saveAsPlaylist: "Save as Playlist",
+    playlistName: "Playlist Name",
+    playlistDesc: "Description (optional)",
+    savePlaylist: "Save",
+    cancel: "Cancel",
+    playlistSaved: "Playlist saved",
+    playlistSaveFailed: "Failed to save playlist",
+    createdBy: "Created",
     tonightNoRandom: "Tonight no random, tonight has taste",
     afterClaude: "After a long day with Claude Code, just breathe.",
     backIn1971: "Back in 1971, David Gates picked up a nylon-string guitar...",
@@ -146,6 +163,23 @@ export const translations = {
 
     // Misc
     tasteLoaded: "taste.md 已加载",
+
+    // Playlists
+    navPlaylists: "歌单",
+    playlistsTitle: "歌单",
+    emptyPlaylists: "还没有歌单",
+    playlistSongs: "首歌",
+    playAll: "播放全部",
+    deletePlaylist: "删除",
+    confirmDelete: "确定删除这个歌单吗？",
+    saveAsPlaylist: "保存为歌单",
+    playlistName: "歌单名称",
+    playlistDesc: "描述（可选）",
+    savePlaylist: "保存",
+    cancel: "取消",
+    playlistSaved: "歌单已保存",
+    playlistSaveFailed: "保存歌单失败",
+    createdBy: "创建于",
     tonightNoRandom: "今晚不随机，今晚有品味",
     afterClaude: "After a long day with Claude Code, just breathe.",
     backIn1971: "Back in 1971, David Gates picked up a nylon-string guitar...",

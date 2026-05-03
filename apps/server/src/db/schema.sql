@@ -54,3 +54,27 @@ CREATE TABLE IF NOT EXISTS queue_items (
   sort_order INTEGER NOT NULL,
   status TEXT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS playlists (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  description TEXT,
+  cover_url TEXT,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS playlist_items (
+  id TEXT PRIMARY KEY,
+  playlist_id TEXT NOT NULL,
+  type TEXT NOT NULL,
+  song_id TEXT,
+  title TEXT,
+  artist TEXT,
+  cover_url TEXT,
+  audio_url TEXT,
+  text_field TEXT,
+  reason TEXT,
+  sort_order INTEGER NOT NULL,
+  FOREIGN KEY (playlist_id) REFERENCES playlists(id) ON DELETE CASCADE
+);

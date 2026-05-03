@@ -1,17 +1,19 @@
 import type { FastifyInstance } from "fastify";
+import { getTopArtists, getRecentThemes, getMoodPreference, getPlayStats } from "../db/plays.repo.js";
 
 export async function profileRoutes(app: FastifyInstance) {
   app.get("/api/profile", async () => {
+    const topArtists = getTopArtists(10);
+    const recentThemes = getRecentThemes(5);
+    const moodPreference = getMoodPreference();
+    const stats = getPlayStats();
+
     return {
-      topArtists: [
-        { name: "周杰伦", count: 42 },
-        { name: "陈奕迅", count: 35 },
-        { name: "Radiohead", count: 28 },
-      ],
-      decadeDistribution: { "2000s": 30, "2010s": 45, "2020s": 25 },
-      languageDistribution: { zh: 60, en: 30, ja: 10 },
-      moodPreference: { 安静: 35, 怀旧: 25, 燃: 20, 电子: 20 },
-      recentThemes: ["写代码", "放松", "早晨"],
+      topArtists: topArtists.length > 0 ? topArtists : [{ name: "暂无数据", count: 0 }],
+      decadeDistribution: { "2020s": stats.totalPlays > 0 ? 100 : 0 },
+      languageDistribution: { zh: stats.totalPlays > 0 ? 100 : 0 },
+      moodPreference: Object.keys(moodPreference).length > 0 ? moodPreference : { 暂无: 1 },
+      recentThemes: recentThemes.length > 0 ? recentThemes : ["暂无播放记录"],
     };
   });
 }

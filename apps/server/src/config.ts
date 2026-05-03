@@ -8,6 +8,7 @@ export interface AppConfig {
   };
   ncm: {
     apiBaseUrl: string;
+    uid: string;
   };
   fishAudio: {
     apiKey: string;
@@ -38,6 +39,7 @@ export function loadConfig(): AppConfig {
     },
     ncm: {
       apiBaseUrl: env("NCM_API_BASE_URL", "http://localhost:3000"),
+      uid: env("NCM_UID"),
     },
     fishAudio: {
       apiKey: env("FISH_AUDIO_API_KEY"),

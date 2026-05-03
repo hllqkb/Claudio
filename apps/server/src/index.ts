@@ -14,6 +14,10 @@ import { intentRoutes } from "./routes/intent.js";
 import { streamRoutes } from "./routes/stream.js";
 import { mediaRoutes } from "./routes/media.js";
 import { audioRoutes } from "./routes/audio.js";
+import { playlistRoutes } from "./routes/playlist.js";
+import { ncmPlaylistRoutes } from "./routes/ncm-playlists.js";
+import { lyricRoutes } from "./routes/lyric.js";
+import { coverRoutes } from "./routes/cover.js";
 import { MockNcmService, NeteaseNcmService } from "./services/ncm.service.js";
 import { MockClaudeService, ClaudeApiService } from "./services/claude.service.js";
 import { readFileSync } from "node:fs";
@@ -25,6 +29,7 @@ import { MockCalendarService, FeishuCalendarService } from "./services/calendar.
 import { MockUpnpService } from "./services/upnp.service.js";
 import { MockSchedulerService, CronSchedulerService } from "./services/scheduler.service.js";
 import { ContextService } from "./services/context.service.js";
+import { PlaylistService } from "./services/playlist.service.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const config = loadConfig();
@@ -37,8 +42,9 @@ await app.register(websocket);
 getDb();
 
 const ncmCookie = getSetting("ncm_cookie") ?? "";
+const ncmUid = getSetting("ncm_uid") ?? config.ncm.uid;
 const ncm = config.ncm.apiBaseUrl
-  ? new NeteaseNcmService(config.ncm.apiBaseUrl, ncmCookie || undefined)
+  ? new NeteaseNcmService(config.ncm.apiBaseUrl, ncmCookie || undefined, ncmUid || undefined)
   : new MockNcmService();
 const claudeApiKey = getSetting("claude_api_key") ?? config.claude.apiKey;
 const claude = claudeApiKey
@@ -67,13 +73,14 @@ const calendar = feishuAppId && feishuAppSecret
 
 const upnp = new MockUpnpService();
 const context = new ContextService(weather, calendar);
+const playlist = new PlaylistService();
 
 // 调度器需要 claude 和 context，所以在它们之后创建
 const scheduler = claudeApiKey
   ? new CronSchedulerService({ claude, context })
   : new MockSchedulerService();
 
-app.decorate("services", { ncm, claude, tts, weather, calendar, upnp, scheduler, context });
+app.decorate("services", { ncm, claude, tts, weather, calendar, upnp, scheduler, context, playlist });
 
 app.get("/api/health", async () => ({
   status: "ok",
@@ -96,6 +103,10 @@ await app.register(intentRoutes);
 await app.register(streamRoutes);
 await app.register(mediaRoutes);
 await app.register(audioRoutes);
+await app.register(playlistRoutes);
+await app.register(ncmPlaylistRoutes);
+await app.register(lyricRoutes);
+await app.register(coverRoutes);
 
 async function start() {
   try {

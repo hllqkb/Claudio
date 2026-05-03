@@ -1,5 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import { broadcast } from "./stream.js";
+import { recordPlay, upsertSong } from "../db/plays.repo.js";
 
 let isPlaying = true;
 let currentIndex = 0;
@@ -55,5 +56,37 @@ export async function playerRoutes(app: FastifyInstance) {
   app.post("/api/player/seek", async (request) => {
     const { positionMs } = request.body as { positionMs: number };
     return { ok: true, positionMs };
+  });
+
+  app.post("/api/plays/report", async (request) => {
+    const body = request.body as {
+      songId?: string;
+      title?: string;
+      artist?: string;
+      coverUrl?: string;
+      durationMs?: number;
+      scene?: string;
+    };
+
+    if (body.songId) {
+      upsertSong({
+        id: body.songId,
+        title: body.title ?? "Unknown",
+        artist: body.artist,
+        coverUrl: body.coverUrl,
+        durationMs: body.durationMs,
+      });
+
+      recordPlay({
+        id: `play_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+        itemId: body.songId,
+        itemType: "song",
+        songId: body.songId,
+        action: "play",
+        scene: body.scene,
+      });
+    }
+
+    return { ok: true };
   });
 }

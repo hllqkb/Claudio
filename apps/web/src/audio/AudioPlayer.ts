@@ -6,13 +6,24 @@ class AudioPlayerManager {
   private onPlayListeners: Listener[] = [];
   private onPauseListeners: Listener[] = [];
   private onEndedListeners: Listener[] = [];
+  private onErrorListeners: Listener[] = [];
   private onTimeListeners: TimeListener[] = [];
+  private pendingPlay = false;
 
   constructor() {
     this.audio = new Audio();
-    this.audio.addEventListener("play", () => this.onPlayListeners.forEach((fn) => fn()));
+    this.audio.crossOrigin = "anonymous";
+    this.audio.preload = "auto";
+    this.audio.addEventListener("play", () => {
+      this.pendingPlay = false;
+      this.onPlayListeners.forEach((fn) => fn());
+    });
     this.audio.addEventListener("pause", () => this.onPauseListeners.forEach((fn) => fn()));
     this.audio.addEventListener("ended", () => this.onEndedListeners.forEach((fn) => fn()));
+    this.audio.addEventListener("error", () => {
+      console.warn("[audio] Error event:", this.audio.error);
+      this.onErrorListeners.forEach((fn) => fn());
+    });
     this.audio.addEventListener("timeupdate", () => {
       this.onTimeListeners.forEach((fn) => fn(this.audio.currentTime * 1000, this.audio.duration * 1000 || 0));
     });
@@ -25,9 +36,20 @@ class AudioPlayerManager {
 
   async play() {
     try {
+      this.pendingPlay = true;
       await this.audio.play();
     } catch (err) {
-      console.error("Audio play failed:", err);
+      console.warn("[audio] Play failed (autoplay blocked?):", err);
+      this.pendingPlay = false;
+    }
+  }
+
+  /** Retry play - called from user gesture context */
+  retryPlay() {
+    if (this.pendingPlay || this.audio.paused) {
+      this.audio.play().catch((err) => {
+        console.error("[audio] Retry play failed:", err);
+      });
     }
   }
 
@@ -47,6 +69,14 @@ class AudioPlayerManager {
     return !this.audio.paused;
   }
 
+  get isPending() {
+    return this.pendingPlay;
+  }
+
+  get audioElement() {
+    return this.audio;
+  }
+
   get currentTimeMs() {
     return this.audio.currentTime * 1000;
   }
@@ -58,6 +88,7 @@ class AudioPlayerManager {
   onPlay(fn: Listener) { this.onPlayListeners.push(fn); }
   onPause(fn: Listener) { this.onPauseListeners.push(fn); }
   onEnded(fn: Listener) { this.onEndedListeners.push(fn); }
+  onError(fn: Listener) { this.onErrorListeners.push(fn); }
   onTimeUpdate(fn: TimeListener) { this.onTimeListeners.push(fn); }
 }
 
