@@ -102,6 +102,29 @@ export interface FavoriteItem {
     createdAt: string;
 }
 
+export interface ProfilePreferences {
+    favoriteGenres: string[];
+    dislikedGenres: string[];
+    preferredScenes: string[];
+    preferredMoods: string[];
+    userNote: string;
+}
+
+export interface FullProfileResponse {
+    stats: {
+        totalPlays: number;
+        totalMinutes: number;
+        favoriteCount: number;
+        topArtists: Array<{ name: string; count: number }>;
+        decadeDistribution: Record<string, number>;
+        languageDistribution: Record<string, number>;
+        moodPreference: Record<string, number>;
+        recentThemes: string[];
+    };
+    preferences: ProfilePreferences;
+    dailyRecommendations: Array<{ date: string; songIds: string[] }>;
+}
+
 export interface StructuredReply {
     say: string;
     reason?: string;
@@ -382,6 +405,12 @@ export const api = {
             recentThemes: string[];
         }>("/api/profile"),
     getPlaylists: () => request<{ playlists: Playlist[] }>("/api/playlists"),
+    getFullProfile: () => request<FullProfileResponse>("/api/profile/full"),
+    updateProfilePreferences: (prefs: ProfilePreferences) =>
+        request<{ ok: boolean }>("/api/profile/preferences", {
+            method: "PUT",
+            body: JSON.stringify(prefs),
+        }),
     getPlaylist: (id: string) => request<{ playlist: Playlist }>(`/api/playlists/${id}`),
     createPlaylist: (body: { name: string; description?: string; items: PlaylistItem[] }) =>
         request<{ playlist: Playlist }>("/api/playlists", {

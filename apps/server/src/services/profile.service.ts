@@ -16,6 +16,11 @@ export interface UserProfile {
   moodHistory: Array<{ mood: string; ts: number }>;
   lastRecommendDate?: string;
   dailyRecommendations: Array<{ date: string; songIds: string[] }>;
+  favoriteGenres: string[];
+  dislikedGenres: string[];
+  preferredScenes: string[];
+  preferredMoods: string[];
+  userNote: string;
 }
 
 const DEFAULT_PROFILE: UserProfile = {
@@ -24,6 +29,11 @@ const DEFAULT_PROFILE: UserProfile = {
   inferredArtists: {},
   moodHistory: [],
   dailyRecommendations: [],
+  favoriteGenres: [],
+  dislikedGenres: [],
+  preferredScenes: [],
+  preferredMoods: [],
+  userNote: "",
 };
 
 export class ProfileService {
@@ -66,6 +76,38 @@ export class ProfileService {
 
   getProfile(): UserProfile {
     return this.profile;
+  }
+
+  async updatePreferences(prefs: {
+    favoriteGenres?: string[];
+    dislikedGenres?: string[];
+    preferredScenes?: string[];
+    preferredMoods?: string[];
+    userNote?: string;
+  }): Promise<void> {
+    await this.load();
+    if (prefs.favoriteGenres !== undefined) this.profile.favoriteGenres = prefs.favoriteGenres;
+    if (prefs.dislikedGenres !== undefined) this.profile.dislikedGenres = prefs.dislikedGenres;
+    if (prefs.preferredScenes !== undefined) this.profile.preferredScenes = prefs.preferredScenes;
+    if (prefs.preferredMoods !== undefined) this.profile.preferredMoods = prefs.preferredMoods;
+    if (prefs.userNote !== undefined) this.profile.userNote = prefs.userNote;
+    await this.save();
+  }
+
+  getPreferences(): {
+    favoriteGenres: string[];
+    dislikedGenres: string[];
+    preferredScenes: string[];
+    preferredMoods: string[];
+    userNote: string;
+  } {
+    return {
+      favoriteGenres: this.profile.favoriteGenres,
+      dislikedGenres: this.profile.dislikedGenres,
+      preferredScenes: this.profile.preferredScenes,
+      preferredMoods: this.profile.preferredMoods,
+      userNote: this.profile.userNote,
+    };
   }
 
   async recordListen(
@@ -151,6 +193,16 @@ export class ProfileService {
     const recentMood = p.moodHistory.slice(-3);
     if (recentMood.length > 0) {
       parts.push(`最近情绪：${recentMood.map((m) => m.mood).join("→")}`);
+    }
+
+    if (p.favoriteGenres.length > 0) {
+      parts.push(`用户喜欢的音乐风格：${p.favoriteGenres.join("、")}`);
+    }
+    if (p.dislikedGenres.length > 0) {
+      parts.push(`用户不喜欢的风格：${p.dislikedGenres.join("、")}`);
+    }
+    if (p.userNote) {
+      parts.push(`用户备注：${p.userNote}`);
     }
 
     return parts.join("\n");

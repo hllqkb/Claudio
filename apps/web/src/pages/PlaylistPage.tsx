@@ -1,18 +1,20 @@
 import { useEffect, useState, useCallback } from "react";
-import { api, type NcmPlaylistSummary, type NcmTrack, type QueueItem, type Playlist } from "../api/client";
+import { api, type NcmPlaylistSummary, type NcmTrack, type QueueItem, type Playlist, type FavoriteItem } from "../api/client";
 import { usePlayerStore } from "../stores/playerStore";
 import { useI18n } from "../i18n/context";
 import type { TranslationKey } from "../i18n/translations";
 
 type View = "list" | "detail";
-type Tab = "local" | "ncm";
+type Tab = "favorites" | "local" | "ncm";
 
 export default function PlaylistPage() {
   const [ncmPlaylists, setNcmPlaylists] = useState<NcmPlaylistSummary[]>([]);
   const [localPlaylists, setLocalPlaylists] = useState<Playlist[]>([]);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<View>("list");
-  const [tab, setTab] = useState<Tab>("local");
+  const [tab, setTab] = useState<Tab>("favorites");
+  const [favorites, setFavorites] = useState<FavoriteItem[]>([]);
+  const [favoritesLoading, setFavoritesLoading] = useState(true);
   const [selected, setSelected] = useState<NcmPlaylistSummary | null>(null);
   const [selectedLocal, setSelectedLocal] = useState<Playlist | null>(null);
   const [tracks, setTracks] = useState<NcmTrack[]>([]);
@@ -22,16 +24,19 @@ export default function PlaylistPage() {
 
   const fetchPlaylists = useCallback(async () => {
     try {
-      const [ncmData, localData] = await Promise.all([
+      const [ncmData, localData, favData] = await Promise.all([
         api.getNcmPlaylists().catch(() => ({ playlists: [] })),
         api.getPlaylists().catch(() => ({ playlists: [] })),
+        api.getFavorites().catch(() => ({ favorites: [] })),
       ]);
       setNcmPlaylists(ncmData.playlists);
       setLocalPlaylists(localData.playlists);
+      setFavorites(favData.favorites);
     } catch (err) {
       console.error("Failed to fetch playlists:", err);
     } finally {
       setLoading(false);
+      setFavoritesLoading(false);
     }
   }, []);
 
@@ -116,6 +121,9 @@ export default function PlaylistPage() {
       {view === "list" ? (
         <>
           <div className="pl-tabs">
+            <button className={`pl-tab ${tab === "favorites" ? "active" : ""}`} onClick={() => setTab("favorites")}>
+              {t("favoritesTab")}
+            </button>
             <button className={`pl-tab ${tab === "local" ? "active" : ""}`} onClick={() => setTab("local")}>
               {t("localPlaylists")}
             </button>
@@ -123,7 +131,14 @@ export default function PlaylistPage() {
               {t("ncmPlaylists")}
             </button>
           </div>
-          {tab === "local" ? (
+          {tab === "favorites" ? (
+            <FavoritesList
+              favorites={favorites}
+              loading={favoritesLoading}
+              onRemove={(songId) => setFavorites((prev) => prev.filter((f) => f.songId !== songId))}
+              t={t}
+            />
+          ) : tab === "local" ? (
             <LocalPlaylistList playlists={localPlaylists} onSelect={openLocalPlaylist} t={t} />
           ) : (
             <PlaylistList playlists={ncmPlaylists} onSelect={openNcmPlaylist} t={t} />
@@ -466,6 +481,118 @@ function LocalPlaylistDetail({
           ))
         )}
       </div>
+    </>
+  );
+}
+
+function FavoritesList({
+  favorites,
+  loading,
+  onRemove,
+  t,
+}: {
+  favorites: FavoriteItem[];
+  loading: boolean;
+  onRemove: (songId: string) => void;
+  t: (key: TranslationKey) => string;
+}) {
+  const playItem = usePlayerStore((s) => s.playItem);
+
+  const handlePlayTrack = (index: number) => {
+    const queueItems: QueueItem[] = favorites.map((f, i) => ({
+      id: `fav_${f.songId}_${i}`,
+      type: "song" as const,
+      songId: f.songId,
+      title: f.title ?? undefined,
+      artist: f.artist ?? undefined,
+      coverUrl: f.coverUrl ?? undefined,
+      audioUrl: `/api/audio?id=${encodeURIComponent(f.songId)}&title=${encodeURIComponent(f.title ?? "")}&artist=${encodeURIComponent(f.artist ?? "")}`,
+      status: i === index ? ("playing" as const) : ("pending" as const),
+    }));
+    usePlayerStore.setState({ queue: queueItems });
+    playItem(queueItems[index]);
+  };
+
+  const handlePlayAll = () => {
+    if (favorites.length > 0) handlePlayTrack(0);
+  };
+
+  const handleRemove = async (e: React.MouseEvent, songId: string) => {
+    e.stopPropagation();
+    try {
+      await api.removeFavorite(songId);
+      onRemove(songId);
+    } catch (err) {
+      console.error("Failed to remove favorite:", err);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="pl-loading">
+        <div className="pl-loading-spinner" />
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <div className="pl-header">
+        <h1 className="pl-title">{t("favoritesTab")}</h1>
+        <span className="pl-count">{favorites.length}</span>
+      </div>
+
+      {favorites.length === 0 ? (
+        <div className="pl-empty">
+          <div className="pl-empty-icon">&#10084;</div>
+          <div className="pl-empty-text">{t("noFavorites")}</div>
+        </div>
+      ) : (
+        <>
+          <div className="pl-actions-bar">
+            <button className="pl-btn-play-all" onClick={handlePlayAll}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M8 5v14l11-7z" />
+              </svg>
+              <span>{t("playAll")}</span>
+            </button>
+          </div>
+          <div className="pl-tracks">
+            {favorites.map((fav, i) => (
+              <div
+                key={fav.songId}
+                className="pl-track"
+                style={{ animationDelay: `${i * 0.03}s` }}
+                onClick={() => handlePlayTrack(i)}
+              >
+                <span className="pl-track-num">{i + 1}</span>
+                <div className="pl-track-cover">
+                  {fav.coverUrl ? (
+                    <img src={fav.coverUrl} alt="" loading="lazy" />
+                  ) : (
+                    <div className="pl-track-cover-fallback">
+                      <span>&#9835;</span>
+                    </div>
+                  )}
+                </div>
+                <div className="pl-track-info">
+                  <div className="pl-track-title">{fav.title ?? "Unknown"}</div>
+                  <div className="pl-track-artist">{fav.artist ?? ""}</div>
+                </div>
+                <button
+                  className="pl-fav-remove-btn"
+                  onClick={(e) => handleRemove(e, fav.songId)}
+                  title={t("removeFavorite")}
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                  </svg>
+                </button>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
     </>
   );
 }

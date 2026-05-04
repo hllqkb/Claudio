@@ -54,6 +54,11 @@ export default function SettingsPage() {
     { key: "tts_frequency", label: t("ttsFreqLabel"), sensitive: false, service: "" },
   ];
 
+  const toggleSetting = (key: string) => {
+    const current = settings[key] ?? "true";
+    updateSetting(key, current === "true" ? "false" : "true");
+  };
+
   return (
     <div className="main-inner">
       <div className="settings-page">
@@ -112,6 +117,84 @@ export default function SettingsPage() {
           <button className="save-btn" onClick={handleSave} disabled={saving}>
             {saving ? t("saving") : t("save")}
           </button>
+        </div>
+
+        {/* Audio Settings */}
+        <div className="settings-section">
+          <div className="settings-section-title">{t("audioSettings")}</div>
+          <div className="setting-field">
+            <label>{t("audioQuality")}</label>
+            <select
+              className="setting-select"
+              value={settings["audio_quality"] ?? "128"}
+              onChange={(e) => updateSetting("audio_quality", e.target.value)}
+            >
+              <option value="128">{t("qualityStandard")}</option>
+              <option value="320">{t("qualityHigh")}</option>
+              <option value="lossless">{t("qualityLossless")}</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Visualization Settings */}
+        <div className="settings-section">
+          <div className="settings-section-title">{t("spectrumSettings")}</div>
+          <div className="setting-field setting-toggle-row">
+            <label>{t("spectrumEnabled")}</label>
+            <button
+              className={`toggle-switch ${(settings["spectrum_enabled"] ?? "true") === "true" ? "on" : "off"}`}
+              onClick={() => toggleSetting("spectrum_enabled")}
+            >
+              <span className="toggle-knob" />
+            </button>
+          </div>
+        </div>
+
+        {/* AI Assistant Settings */}
+        <div className="settings-section">
+          <div className="settings-section-title">{t("aiSettings")}</div>
+          <div className="setting-field">
+            <label>{t("aiLanguage")}</label>
+            <select
+              className="setting-select"
+              value={settings["ai_language"] ?? "zh"}
+              onChange={(e) => updateSetting("ai_language", e.target.value)}
+            >
+              <option value="zh">中文</option>
+              <option value="en">English</option>
+              <option value="ja">日本語</option>
+            </select>
+          </div>
+          <div className="setting-field setting-toggle-row">
+            <label>{t("dailyRecommend")}</label>
+            <button
+              className={`toggle-switch ${(settings["daily_recommend_enabled"] ?? "true") === "true" ? "on" : "off"}`}
+              onClick={() => toggleSetting("daily_recommend_enabled")}
+            >
+              <span className="toggle-knob" />
+            </button>
+          </div>
+        </div>
+
+        {/* About */}
+        <div className="settings-section">
+          <div className="settings-section-title">{t("about")}</div>
+          <div className="about-info">
+            <div className="about-row">
+              <span className="about-label">{t("version")}</span>
+              <span className="about-value">1.0.0</span>
+            </div>
+            <div className="about-row">
+              <span className="about-label">GitHub</span>
+              <a className="about-link" href="https://github.com/hllqkb/Claudio" target="_blank" rel="noopener noreferrer">
+                hllqkb/Claudio
+              </a>
+            </div>
+            <div className="about-row">
+              <span className="about-label">Stack</span>
+              <span className="about-value">Fastify + React + SQLite + Claude AI</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>

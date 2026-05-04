@@ -98,6 +98,41 @@ export const translations = {
     afterClaude: "After a long day with Claude Code, just breathe.",
     backIn1971: "Back in 1971, David Gates picked up a nylon-string guitar...",
     iSpinOnBoot: "I spin on boot",
+
+    // Favorites tab
+    favoritesTab: "Favorites",
+    noFavorites: "No favorites yet",
+    removeFavorite: "Remove",
+
+    // Profile v2
+    musicProfile: "Music Profile",
+    myPreferences: "My Preferences",
+    favoriteGenres: "Favorite Genres",
+    dislikedGenres: "Disliked Genres",
+    preferredScenes: "Listening Scenes",
+    preferredMoods: "Mood Preferences",
+    userNote: "Personal Notes",
+    addTag: "Add...",
+    savePreferences: "Save Preferences",
+    preferencesSaved: "Preferences saved",
+    dailyHistory: "Daily Recommendations",
+    noRecommendations: "No recommendations yet",
+
+    // Settings v2
+    audioSettings: "Audio",
+    audioQuality: "Audio Quality",
+    qualityStandard: "Standard (128k)",
+    qualityHigh: "High (320k)",
+    qualityLossless: "Lossless",
+    spectrumSettings: "Visualization",
+    spectrumEnabled: "Spectrum Animation",
+    aiSettings: "AI Assistant",
+    aiLanguage: "AI Response Language",
+    dailyRecommend: "Daily Recommendations",
+    enabled: "Enabled",
+    disabled: "Disabled",
+    about: "About",
+    version: "Version",
   },
   zh: {
     // App
@@ -198,6 +233,41 @@ export const translations = {
     afterClaude: "After a long day with Claude Code, just breathe.",
     backIn1971: "Back in 1971, David Gates picked up a nylon-string guitar...",
     iSpinOnBoot: "一开机我就打碟",
+
+    // Favorites tab
+    favoritesTab: "收藏",
+    noFavorites: "还没有收藏歌曲",
+    removeFavorite: "取消收藏",
+
+    // Profile v2
+    musicProfile: "音乐画像",
+    myPreferences: "我的偏好",
+    favoriteGenres: "喜欢的风格",
+    dislikedGenres: "不喜欢的风格",
+    preferredScenes: "常听场景",
+    preferredMoods: "心情偏好",
+    userNote: "个人备注",
+    addTag: "添加...",
+    savePreferences: "保存偏好",
+    preferencesSaved: "偏好已保存",
+    dailyHistory: "每日推荐记录",
+    noRecommendations: "暂无推荐记录",
+
+    // Settings v2
+    audioSettings: "音频",
+    audioQuality: "音频质量",
+    qualityStandard: "标准 (128k)",
+    qualityHigh: "高品质 (320k)",
+    qualityLossless: "无损",
+    spectrumSettings: "可视化",
+    spectrumEnabled: "频谱动画",
+    aiSettings: "AI 助手",
+    aiLanguage: "AI 回复语言",
+    dailyRecommend: "每日推荐",
+    enabled: "开启",
+    disabled: "关闭",
+    about: "关于",
+    version: "版本",
   },
 } as const;
 
