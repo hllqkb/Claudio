@@ -58,10 +58,10 @@ export default function SpectrumBars({ active }: Props) {
     resize();
     window.addEventListener("resize", resize);
 
-    // Log frequency mapping
+    // Log frequency mapping — center bars start from ~60Hz, not 0Hz
     const logMap: number[] = [];
     for (let i = 0; i < SOURCE_BARS; i++) {
-      const minLog = Math.log10(1);
+      const minLog = Math.log10(2);
       const maxLog = Math.log10(512);
       logMap.push(Math.pow(10, minLog + (maxLog - minLog) * (i / SOURCE_BARS)));
     }
@@ -90,10 +90,17 @@ export default function SpectrumBars({ active }: Props) {
       for (let i = 0; i < SOURCE_BARS; i++) {
         let target: number;
         if (active && freqData) {
-          const idx = Math.min(Math.floor(logMap[i]), freqData.length - 1);
+          // Average a small range of bins for smoother, more responsive bars
+          const centerBin = Math.floor(logMap[i]);
+          const binSpan = Math.max(1, Math.floor(centerBin * 0.3));
+          const lo = Math.max(1, centerBin - binSpan);
+          const hi = Math.min(freqData.length - 1, centerBin + binSpan);
+          let sum = 0;
+          for (let b = lo; b <= hi; b++) sum += freqData[b];
+          const avg = sum / (hi - lo + 1);
           const ratio = i / SOURCE_BARS;
           const boost = 1.0 + Math.pow(1.0 - ratio, 2.0) * 1.5;
-          target = Math.min(1, (freqData[idx] || 0) / 255 * boost);
+          target = Math.min(1, avg / 255 * boost);
         } else {
           // Idle: multi-layer sine breathing
           target =
