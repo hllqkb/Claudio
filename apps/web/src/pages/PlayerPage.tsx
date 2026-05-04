@@ -9,6 +9,8 @@ import IntentInput from "../components/IntentInput";
 import ChatArea from "../components/ChatArea";
 import QueueList from "../components/QueueList";
 import AudioVisualizer from "../components/AudioVisualizer";
+import FluidBlobs from "../components/FluidBlobs";
+import BorderGlow from "../components/BorderGlow";
 import SearchPanel from "../components/SearchPanel";
 import { PlayerSkeleton } from "../components/Skeleton";
 import { api } from "../api/client";
@@ -39,6 +41,8 @@ export default function PlayerPage() {
   const { t } = useI18n();
 
   const [visualMode, setVisualMode] = useState<ModeKey>("Glob");
+  const [bass, setBass] = useState(0);
+  const [mid, setMid] = useState(0);
   const [showExtras, setShowExtras] = useState(false);
   const [initialLoaded, setInitialLoaded] = useState(false);
 
@@ -57,9 +61,24 @@ export default function PlayerPage() {
   useEffect(() => {
     fetchNow().finally(() => setInitialLoaded(true));
     loadFavorites();
+    restorePlayback();
     wsClient.connect();
     return () => wsClient.disconnect();
-  }, [fetchNow, loadFavorites]);
+  }, [fetchNow, loadFavorites, restorePlayback]);
+
+  // Extract dynamic colors from album art
+  useEffect(() => {
+    if (nowPlaying?.coverUrl) {
+      extractColors(nowPlaying.coverUrl);
+    }
+  }, [nowPlaying?.coverUrl]);
+
+  // Particle burst on song change
+  useEffect(() => {
+    if (nowPlaying?.songId) {
+      burstParticles(window.innerWidth / 2, window.innerHeight / 2);
+    }
+  }, [nowPlaying?.songId]);
 
   const statusText =
     djStatus === "idle" ? t("idle")
@@ -130,7 +149,13 @@ export default function PlayerPage() {
   return (
     <div className="main-inner">
       {/* Music-reactive background */}
-      <AudioVisualizer mode={visualMode} />
+      <AudioVisualizer mode={visualMode} onFrequencyData={(b, m) => { setBass(b); setMid(m); }} />
+
+      {/* Fluid blob background */}
+      <FluidBlobs bass={bass} mid={mid} />
+
+      {/* Border wave glow */}
+      <BorderGlow />
 
       {/* Player Card - Always Visible */}
       <div className="player-card">

@@ -6,6 +6,8 @@ import { useTheme } from "./hooks/useTheme";
 import ToastContainer, { ShortcutHintBar } from "./components/Toast";
 import MiniPlayer from "./components/MiniPlayer";
 import ThemeToggle from "./components/ThemeToggle";
+import ParticleCanvas from "./components/ParticleCanvas";
+import VoiceOverlay from "./components/VoiceOverlay";
 import PlayerPage from "./pages/PlayerPage";
 import HistoryPage from "./pages/HistoryPage";
 import SettingsPage from "./pages/SettingsPage";
@@ -142,6 +144,12 @@ export default function App() {
 
       {/* Keyboard shortcut hint */}
       <ShortcutHintBar />
+
+      {/* Particle burst effect (canvas) */}
+      <ParticleCanvas />
+
+      {/* Voice/DJ overlay */}
+      <VoiceOverlay />
     </div>
   );
 }
