@@ -2031,23 +2031,19 @@ body::after {
 .karaoke-line-wrapper {
   padding: 8px 20px;
   text-align: center;
-  transition: opacity 0.4s ease, transform 0.4s ease;
-  will-change: opacity, transform;
+  transition: opacity 0.3s ease;
 }
 
 .karaoke-line-wrapper.past {
   opacity: 0.3;
-  transform: scale(0.95);
 }
 
 .karaoke-line-wrapper.future {
   opacity: 0.5;
-  transform: scale(0.97);
 }
 
 .karaoke-line-wrapper.active {
   opacity: 1;
-  transform: scale(1);
 }
 
 .karaoke-text {
@@ -2055,7 +2051,6 @@ body::after {
   line-height: 2;
   font-weight: 500;
   color: var(--text-secondary);
-  transition: all 0.3s ease;
 }
 
 .karaoke-line-wrapper.active .karaoke-text {
@@ -2066,19 +2061,16 @@ body::after {
 }
 
 .karaoke-char {
-  transition: color 0.15s ease, text-shadow 0.15s ease, transform 0.15s ease;
-  will-change: color, text-shadow;
+  transition: color 0.15s ease, text-shadow 0.15s ease;
 }
 
 .karaoke-char.lit {
   color: var(--mint);
   text-shadow: 0 0 20px var(--mint-glow), 0 0 40px rgba(94,232,197,0.2);
-  transform: scale(1.05);
 }
 
 .karaoke-char.unlit {
   color: var(--text-dim);
-  transform: scale(1);
 }
 
 .karaoke-translation {
@@ -3996,16 +3988,7 @@ button {
 }
 
 /* ===== YRC Word Highlight ===== */
-.karaoke-char {
-  transition: color 0.1s ease, text-shadow 0.1s ease;
-}
-.karaoke-char.lit {
-  color: var(--mint);
-  text-shadow: 0 0 8px var(--mint-glow);
-}
-.karaoke-char.unlit {
-  color: var(--text-muted);
-}
+/* (merged into the primary .karaoke-char rules above — no duplicates) */
 
 /* ===== Fluid Blob Background ===== */
 .fluid-blob-container {
@@ -4084,7 +4067,7 @@ button {
 .player-content {
   display: flex;
   gap: 24px;
-  align-items: flex-start;
+  align-items: center;
 }
 
 .cover-section {
