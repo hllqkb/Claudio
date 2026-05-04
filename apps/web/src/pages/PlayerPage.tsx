@@ -218,79 +218,6 @@ export default function PlayerPage() {
           <AudioSpectrum active={isPlaying} barCount={40} />
         </div>
 
-        {/* Left Sidebar - AI Chat (absolute overlay) */}
-        <div className={`sidebar-left ${showLeftSidebar ? "open" : ""}`}>
-          <div className="sidebar-header">
-            <span>🤖</span> AI 对话
-            <button className="sidebar-close-btn" onClick={() => setShowLeftSidebar(false)}>✕</button>
-          </div>
-          <div className="sidebar-content">
-            <ChatArea />
-          </div>
-          <IntentInput />
-        </div>
-
-        {/* Left toggle button */}
-        {!showLeftSidebar && (
-          <button
-            className="sidebar-float-btn left"
-            onClick={() => setShowLeftSidebar(true)}
-            title="AI 对话"
-          >
-            ▶
-          </button>
-        )}
-
-        {/* Right toggle button */}
-        {!showRightSidebar && (
-          <button
-            className="sidebar-float-btn right"
-            onClick={() => setShowRightSidebar(true)}
-            title="歌曲选择"
-          >
-            ◀
-          </button>
-        )}
-
-        {/* Right Sidebar - Song Selection (absolute overlay) */}
-        <div className={`sidebar-right ${showRightSidebar ? "open" : ""}`}>
-          <div className="sidebar-header">
-            <span>🎵</span> 歌曲选择
-            <button className="sidebar-close-btn" onClick={() => setShowRightSidebar(false)}>✕</button>
-          </div>
-          <div className="sidebar-content">
-            {/* Visual Mode Selector */}
-            <div className="section-label">VISUAL MODE</div>
-            <div className="theme-grid">
-              {VISUAL_MODES.map((m) => (
-                <button
-                  key={m.key}
-                  className={`theme-btn ${visualMode === m.key ? "active" : ""}`}
-                  onClick={() => setVisualMode(m.key)}
-                >
-                  {m.name}
-                </button>
-              ))}
-            </div>
-
-            {/* Search */}
-            <SearchPanel onSelectSong={(item) => { playItem(item); }} />
-
-            {/* Queue */}
-            {queue.length > 0 && (
-              <div className="queue-section">
-                <div className="queue-header">
-                  <div className="section-label">{t("queueTitle")} ({queue.length})</div>
-                  <button className="btn-save-playlist" onClick={() => setShowSaveDialog(true)}>
-                    {t("saveAsPlaylist")}
-                  </button>
-                </div>
-                <QueueList items={queue} onItemClick={playItem} />
-              </div>
-            )}
-          </div>
-        </div>
-
         {/* Center: Player content */}
         <div className="player-lower">
             <div className="player-content">
@@ -408,6 +335,80 @@ export default function PlayerPage() {
           </div>
 
         <WaveformBar barCount={60} bass={bass} />
+      </div>
+
+      {/* Sidebars — MUST be outside .player-card (backdrop-filter creates containing block) */}
+      {/* Left Sidebar - AI Chat */}
+      <div className={`sidebar-left ${showLeftSidebar ? "open" : ""}`}>
+        <div className="sidebar-header">
+          <span>🤖</span> AI 对话
+          <button className="sidebar-close-btn" onClick={() => setShowLeftSidebar(false)}>✕</button>
+        </div>
+        <div className="sidebar-content">
+          <ChatArea />
+        </div>
+        <IntentInput />
+      </div>
+
+      {/* Left toggle button */}
+      {!showLeftSidebar && (
+        <button
+          className="sidebar-float-btn left"
+          onClick={() => setShowLeftSidebar(true)}
+          title="AI 对话"
+        >
+          🤖
+        </button>
+      )}
+
+      {/* Right toggle button */}
+      {!showRightSidebar && (
+        <button
+          className="sidebar-float-btn right"
+          onClick={() => setShowRightSidebar(true)}
+          title="歌曲选择"
+        >
+          🎵
+        </button>
+      )}
+
+      {/* Right Sidebar - Song Selection */}
+      <div className={`sidebar-right ${showRightSidebar ? "open" : ""}`}>
+        <div className="sidebar-header">
+          <span>🎵</span> 歌曲选择
+          <button className="sidebar-close-btn" onClick={() => setShowRightSidebar(false)}>✕</button>
+        </div>
+        <div className="sidebar-content">
+          {/* Visual Mode Selector */}
+          <div className="section-label">VISUAL MODE</div>
+          <div className="theme-grid">
+            {VISUAL_MODES.map((m) => (
+              <button
+                key={m.key}
+                className={`theme-btn ${visualMode === m.key ? "active" : ""}`}
+                onClick={() => setVisualMode(m.key)}
+              >
+                {m.name}
+              </button>
+            ))}
+          </div>
+
+          {/* Search */}
+          <SearchPanel onSelectSong={(item) => { playItem(item); }} />
+
+          {/* Queue */}
+          {queue.length > 0 && (
+            <div className="queue-section">
+              <div className="queue-header">
+                <div className="section-label">{t("queueTitle")} ({queue.length})</div>
+                <button className="btn-save-playlist" onClick={() => setShowSaveDialog(true)}>
+                  {t("saveAsPlaylist")}
+                </button>
+              </div>
+              <QueueList items={queue} onItemClick={playItem} />
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Bottom spectrum bars */}
