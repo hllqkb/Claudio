@@ -22,8 +22,8 @@ export class ContextService {
   ) {}
 
   async buildContext(input?: string, scene?: string): Promise<string> {
-    const now = new Date().toISOString();
-    const parts: string[] = [`当前时间：${now}`];
+    const now = new Date().toLocaleString("zh-CN", { timeZone: "Asia/Shanghai" });
+    const parts: string[] = [`当前时间：${now}（北京时间）`];
 
     if (scene) {
       parts.push(`当前场景：${scene}`);

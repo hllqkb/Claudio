@@ -32,6 +32,7 @@ export default function PlayerPage() {
     shuffle, repeatMode, toggleShuffle, cycleRepeat,
     lastError, clearError,
     favoriteIds, loadFavorites, toggleFavorite,
+    volume, isMuted, setVolume, toggleMute,
   } = usePlayerStore();
   const { t } = useI18n();
 
@@ -223,6 +224,21 @@ export default function PlayerPage() {
             >
               {repeatMode === "one" ? "🔂" : "🔁"}
             </button>
+            <div className="player-bar-right">
+              <button className="volume-btn" onClick={toggleMute} title={isMuted ? "Unmute" : "Mute"}>
+                {isMuted ? "🔇" : volume < 0.5 ? "🔉" : "🔊"}
+              </button>
+              <input
+                className="volume-slider"
+                type="range"
+                min="0"
+                max="1"
+                step="0.01"
+                value={isMuted ? 0 : volume}
+                onChange={(e) => setVolume(parseFloat(e.target.value))}
+                title={`Volume: ${Math.round((isMuted ? 0 : volume) * 100)}%`}
+              />
+            </div>
           </div>
 
           <KaraokeLyrics songId={nowPlaying?.songId} currentTimeMs={progressMs} />

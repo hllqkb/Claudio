@@ -29,6 +29,7 @@ interface ChatState {
     isStreaming: boolean;
     error: string | null;
 
+    loadHistory: () => Promise<void>;
     send: (text: string) => void;
     abort: () => void;
     clear: () => void;
@@ -42,6 +43,25 @@ export const useChatStore = create<ChatState>((set, get) => ({
     streamingSongs: [],
     isStreaming: false,
     error: null,
+
+    loadHistory: async () => {
+        try {
+            const { messages } = await api.getChatMessages(50);
+            if (messages.length > 0) {
+                set({
+                    messages: messages.map((m) => ({
+                        id: m.id,
+                        role: m.role as ChatMessage["role"],
+                        text: m.text,
+                        ts: m.ts,
+                        songs: m.songs as RecommendedSong[] | undefined,
+                    })),
+                });
+            }
+        } catch (err) {
+            console.warn("[chat] Failed to load history:", err);
+        }
+    },
 
     send: (text: string) => {
         const { isStreaming } = get();
@@ -62,6 +82,9 @@ export const useChatStore = create<ChatState>((set, get) => ({
             isStreaming: true,
             error: null,
         }));
+
+        // Persist user message
+        api.saveChatMessage({ id: userMsg.id, role: "user", text }).catch(() => {});
 
         const collectedSongs: RecommendedSong[] = [];
         let collectedText = "";
@@ -129,6 +152,14 @@ export const useChatStore = create<ChatState>((set, get) => ({
                     streamingSongs: [],
                     isStreaming: false,
                 }));
+
+                // Persist AI message
+                api.saveChatMessage({
+                    id: aiMsg.id,
+                    role: "ai",
+                    text: aiMsg.text,
+                    meta: aiMsg.songs,
+                }).catch(() => {});
             },
 
             onError: (msg) => {

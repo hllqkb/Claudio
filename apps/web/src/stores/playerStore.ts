@@ -23,6 +23,7 @@ interface PlayerState {
   durationMs: number;
   scene: string | null;
   djStatus: "idle" | "thinking" | "speaking" | "error";
+  planLoading: boolean;
 
   // Volume
   volume: number;
@@ -53,6 +54,7 @@ interface PlayerState {
   playItem: (item: QueueItem) => void;
   setQueue: (items: QueueItem[]) => void;
   enqueueItems: (items: QueueItem[]) => void;
+  updateItemAudioUrl: (itemId: string, audioUrl: string) => void;
   addDjMessage: (text: string) => void;
   clearDjMessages: () => void;
   userActionPlay: () => void;
@@ -110,6 +112,40 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
     set({ queue: payload as QueueItem[] });
   });
 
+  wsClient.on("plan_started", () => {
+    set({ planLoading: true });
+  });
+
+  wsClient.on("plan_finished", async () => {
+    set({ planLoading: false });
+    try {
+      const data = await api.getNow();
+      set({
+        nowPlaying: data.nowPlaying,
+        queue: data.queue,
+        scene: data.scene,
+        djStatus: data.djStatus,
+      });
+    } catch (err) {
+      console.error("[ws] failed to refresh after plan_finished:", err);
+    }
+  });
+
+  wsClient.on("tts_ready", (payload) => {
+    const { itemId, audioUrl } = payload as { itemId: string; audioUrl: string };
+    const { queue, nowPlaying } = get();
+    const updatedQueue = queue.map((item) =>
+      item.id === itemId ? { ...item, audioUrl } : item
+    );
+    const updatedNow = nowPlaying?.id === itemId ? { ...nowPlaying, audioUrl } : nowPlaying;
+    set({ queue: updatedQueue, nowPlaying: updatedNow });
+  });
+
+  wsClient.on("error", (payload) => {
+    const { message } = payload as { code: string; message: string };
+    useToastStore.getState().addToast(message, "error");
+  });
+
   return {
     nowPlaying: null,
     queue: [],
@@ -120,6 +156,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
     durationMs: 0,
     scene: null,
     djStatus: "idle",
+    planLoading: false,
 
     // Volume
     volume: 1,
@@ -199,6 +236,32 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
         if (data.nowPlaying?.audioUrl) {
           audioPlayer.load(data.nowPlaying.audioUrl);
         }
+
+        // If queue is empty, auto-load from default NCM playlist
+        if (!data.nowPlaying && data.queue.length === 0) {
+          try {
+            const defaultPlaylistId = "8624020658";
+            const plData = await api.getNcmPlaylistDetail(defaultPlaylistId);
+            if (plData.tracks.length > 0) {
+              const items: QueueItem[] = plData.tracks.map((t, i) => ({
+                id: `default_${t.id}_${i}`,
+                type: "song" as const,
+                songId: t.id,
+                title: t.title,
+                artist: t.artist,
+                coverUrl: t.coverUrl,
+                audioUrl: `/api/audio?id=${encodeURIComponent(t.id)}&title=${encodeURIComponent(t.title)}&artist=${encodeURIComponent(t.artist)}`,
+                status: (i === 0 ? "playing" : "pending") as QueueItem["status"],
+              }));
+              set({ queue: items, nowPlaying: items[0] });
+              if (items[0].audioUrl) {
+                audioPlayer.load(items[0].audioUrl);
+              }
+            }
+          } catch (err) {
+            console.warn("[player] Failed to load default playlist:", err);
+          }
+        }
       } catch (err) {
         console.error("Failed to fetch /api/now:", err);
       }
@@ -207,6 +270,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
     playItem: (item: QueueItem) => {
       if (item.audioUrl) {
         audioPlayer.load(item.audioUrl);
+        audioPlayer.setVolume(get().isMuted ? 0 : get().volume);
         audioPlayer.play();
         setTimeout(() => {
           if (audioPlayer.isPending && audioPlayer.audioElement.paused) {
@@ -358,6 +422,15 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
       } else {
         set({ queue: [...queue, ...newItems] });
       }
+    },
+
+    updateItemAudioUrl: (itemId: string, audioUrl: string) => {
+      const { queue, nowPlaying } = get();
+      const updatedQueue = queue.map((item) =>
+        item.id === itemId ? { ...item, audioUrl } : item
+      );
+      const updatedNow = nowPlaying?.id === itemId ? { ...nowPlaying, audioUrl } : nowPlaying;
+      set({ queue: updatedQueue, nowPlaying: updatedNow });
     },
 
     addDjMessage: (text: string) => {

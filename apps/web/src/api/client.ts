@@ -231,6 +231,9 @@ export const api = {
         }),
     getProfile: () =>
         request<{
+            totalPlays: number;
+            totalMinutes: number;
+            favoriteCount: number;
             topArtists: Array<{ name: string; count: number }>;
             decadeDistribution: Record<string, number>;
             languageDistribution: Record<string, number>;
@@ -263,4 +266,25 @@ export const api = {
         request<{ ok: boolean }>("/api/favorites", { method: "POST", body: JSON.stringify(body) }),
     removeFavorite: (songId: string) =>
         request<{ ok: boolean }>(`/api/favorites/${encodeURIComponent(songId)}`, { method: "DELETE" }),
+    getQueue: () =>
+        request<{ items: QueueItem[] }>("/api/queue"),
+    saveQueue: (items: QueueItem[]) =>
+        request<{ ok: boolean }>("/api/queue", {
+            method: "PUT",
+            body: JSON.stringify({ items }),
+        }),
+    getChatMessages: (limit?: number) =>
+        request<{ messages: Array<{ id: string; role: string; text: string; ts: number; songs?: unknown[] }> }>(
+            `/api/chat/messages${limit ? `?limit=${limit}` : ""}`
+        ),
+    saveChatMessage: (body: { id: string; role: string; text: string; meta?: unknown }) =>
+        request<{ ok: boolean }>("/api/chat/messages", {
+            method: "POST",
+            body: JSON.stringify(body),
+        }),
+    syncFavorites: (songs: Array<{ songId: string; title: string; artist: string; coverUrl?: string }>) =>
+        request<{ ok: boolean; synced: number }>("/api/favorites/sync", {
+            method: "POST",
+            body: JSON.stringify({ songs }),
+        }),
 };

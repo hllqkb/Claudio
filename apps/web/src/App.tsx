@@ -2,8 +2,10 @@ import { Routes, Route, Link, useLocation, useNavigate } from "react-router-dom"
 import { useI18n } from "./i18n/context";
 import { usePlayerStore } from "./stores/playerStore";
 import { useKeyboard } from "./hooks/useKeyboard";
+import { useTheme } from "./hooks/useTheme";
 import ToastContainer, { ShortcutHintBar } from "./components/Toast";
 import MiniPlayer from "./components/MiniPlayer";
+import ThemeToggle from "./components/ThemeToggle";
 import PlayerPage from "./pages/PlayerPage";
 import HistoryPage from "./pages/HistoryPage";
 import SettingsPage from "./pages/SettingsPage";
@@ -14,6 +16,7 @@ export default function App() {
   const location = useLocation();
   const navigate = useNavigate();
   const { t, lang, toggleLang } = useI18n();
+  const { isDark, toggleTheme } = useTheme();
   const nowPlaying = usePlayerStore((s) => s.nowPlaying);
 
   useKeyboard();
@@ -111,6 +114,7 @@ export default function App() {
         </div>
 
         <div className="nav-actions">
+          <ThemeToggle isDark={isDark} onToggle={toggleTheme} />
           <button className="lang-toggle" onClick={toggleLang}>
             {lang === "en" ? "ZH" : "EN"}
           </button>

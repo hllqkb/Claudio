@@ -47,6 +47,10 @@ export const translations = {
     languages: "Languages",
     mood: "Mood",
     recentThemes: "Recent Themes",
+    totalPlays: "Total Plays",
+    totalMinutes: "Minutes Listened",
+    favoriteCount: "Favorites",
+    emptyProfile: "Start playing music to see your music profile here",
     loading: "Loading...",
 
     // Settings
@@ -75,6 +79,8 @@ export const translations = {
     // Playlists
     navPlaylists: "Playlists",
     playlistsTitle: "Playlists",
+    localPlaylists: "My Playlists",
+    ncmPlaylists: "Netease Playlists",
     emptyPlaylists: "No playlists yet",
     playlistSongs: "songs",
     playAll: "Play All",
@@ -141,6 +147,10 @@ export const translations = {
     languages: "语言分布",
     mood: "心情偏好",
     recentThemes: "近期主题",
+    totalPlays: "总播放",
+    totalMinutes: "收听分钟",
+    favoriteCount: "收藏数",
+    emptyProfile: "开始播放音乐后，这里会展示你的音乐画像",
     loading: "加载中...",
 
     // Settings
@@ -169,6 +179,8 @@ export const translations = {
     // Playlists
     navPlaylists: "歌单",
     playlistsTitle: "歌单",
+    localPlaylists: "我的歌单",
+    ncmPlaylists: "网易云歌单",
     emptyPlaylists: "还没有歌单",
     playlistSongs: "首歌",
     playAll: "播放全部",

@@ -83,7 +83,7 @@ export default function SearchPanel({ onSelectSong }: Props) {
                 title: song.title,
                 artist: song.artist,
                 coverUrl: song.coverUrl,
-                audioUrl: "",
+                audioUrl: `/api/audio?id=${encodeURIComponent(song.id)}&title=${encodeURIComponent(song.title)}&artist=${encodeURIComponent(song.artist)}`,
                 status: "pending",
               })}
             >

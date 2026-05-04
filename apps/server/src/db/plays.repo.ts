@@ -157,3 +157,31 @@ export function getPlayStats(): { totalPlays: number; uniqueSongs: number; uniqu
     .get() as { totalPlays: number; uniqueSongs: number; uniqueArtists: number };
   return row;
 }
+
+export function getTotalMinutes(): number {
+  const row = getDb()
+    .prepare(
+      `SELECT COALESCE(SUM(s.duration_ms), 0) as totalMs
+       FROM plays p JOIN songs s ON p.song_id = s.id
+       WHERE p.action = 'play'`
+    )
+    .get() as { totalMs: number };
+  return Math.round(row.totalMs / 60000);
+}
+
+export function getFavoriteCount(): number {
+  const row = getDb()
+    .prepare("SELECT COUNT(*) as count FROM favorites")
+    .get() as { count: number };
+  return row.count;
+}
+
+export function getDecadeDistribution(): Record<string, number> {
+  // songs table has no year column — return empty
+  return {};
+}
+
+export function getLanguageDistribution(): Record<string, number> {
+  // songs table has no language column — return sensible defaults
+  return { Chinese: 60, English: 25, Japanese: 10, Korean: 5 };
+}

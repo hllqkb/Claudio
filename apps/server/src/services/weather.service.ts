@@ -26,7 +26,7 @@ export class WttrInService implements WeatherService {
 
     try {
       const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 5000);
+      const timer = setTimeout(() => controller.abort(), 15000);
 
       const url = `https://wttr.in/${encodeURIComponent(targetCity)}?format=j1`;
       const res = await fetch(url, {

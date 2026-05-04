@@ -47,10 +47,22 @@ export default function KaraokeLyrics({ songId, currentTimeMs }: Props) {
     userScrollTimer.current = setTimeout(() => setAutoScroll(true), 3000);
   }, []);
 
-  // Scroll active line into view
+  // Scroll active line into view — only within the karaoke container, not the whole page
   useEffect(() => {
-    if (autoScroll && activeRef.current) {
-      activeRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+    if (autoScroll && activeRef.current && containerRef.current) {
+      const container = containerRef.current;
+      const active = activeRef.current;
+      const containerRect = container.getBoundingClientRect();
+      const activeRect = active.getBoundingClientRect();
+
+      // Only scroll if the active line is not already visible in the container
+      const isVisible =
+        activeRect.top >= containerRect.top && activeRect.bottom <= containerRect.bottom;
+      if (!isVisible) {
+        const offsetTop = active.offsetTop - container.offsetTop;
+        const targetScroll = offsetTop - container.clientHeight / 2 + active.clientHeight / 2;
+        container.scrollTo({ top: targetScroll, behavior: "smooth" });
+      }
     }
   }, [currentTimeMs, autoScroll]);
 

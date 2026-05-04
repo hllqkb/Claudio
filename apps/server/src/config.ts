@@ -47,7 +47,7 @@ export function loadConfig(): AppConfig {
     },
     openWeather: {
       apiKey: env("OPENWEATHER_API_KEY"),
-      city: env("OPENWEATHER_CITY", "Beijing"),
+      city: env("OPENWEATHER_CITY", "Jiangxi"),
     },
     feishu: {
       appId: env("FEISHU_APP_ID"),

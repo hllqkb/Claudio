@@ -48,6 +48,7 @@ export default function SettingsPage() {
     { key: "openweather_api_key", label: "OpenWeather API Key", sensitive: true, service: "weather" },
     { key: "openweather_city", label: "City", sensitive: false, service: "weather" },
     { key: "ncm_cookie", label: "Netease Cookie", sensitive: true, service: "ncm" },
+    { key: "ncm_uid", label: "Netease UID", sensitive: false, service: "ncm" },
     { key: "feishu_app_id", label: "Feishu App ID", sensitive: false, service: "calendar" },
     { key: "feishu_app_secret", label: "Feishu App Secret", sensitive: true, service: "calendar" },
     { key: "tts_frequency", label: t("ttsFreqLabel"), sensitive: false, service: "" },

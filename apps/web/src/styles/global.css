@@ -2070,6 +2070,41 @@ body::after {
   to { transform: rotate(360deg); }
 }
 
+/* — Tabs — */
+.pl-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 20px;
+  padding: 4px;
+  background: var(--bg-glass);
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border);
+}
+
+.pl-tab {
+  flex: 1;
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--t-fast);
+  font-family: var(--font-body);
+}
+
+.pl-tab:hover {
+  color: var(--text-secondary);
+}
+
+.pl-tab.active {
+  background: var(--mint-subtle);
+  color: var(--mint);
+  box-shadow: 0 0 8px var(--mint-glow);
+}
+
 /* — Header — */
 .pl-header {
   display: flex;
@@ -3267,6 +3302,206 @@ body::after {
 .history-empty { text-align: center; padding: 60px 20px; color: var(--text-muted); font-size: 14px; }
 
 /* ===== Favorite Button ===== */
-.fav-btn { background: none; border: none; font-size: 18px; cursor: pointer; padding: 4px; transition: transform 0.2s; line-height: 1; }
+.fav-btn { background: none; border: none; font-size: 18px; cursor: pointer; padding: 4px; transition: transform var(--t-fast); line-height: 1; }
 .fav-btn:hover { transform: scale(1.2); }
 .fav-btn:active { transform: scale(0.9); }
+.fav-btn.active { animation: heartbeat 0.3s ease; }
+@keyframes heartbeat {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
+
+/* ===== Light Theme ===== */
+[data-theme="light"] {
+  --bg-deep: #f0f2f5;
+  --bg-primary: #f8f9fa;
+  --bg-secondary: #ffffff;
+  --bg-card: #ffffff;
+  --bg-card-upper: #f0f2f5;
+  --bg-glass: rgba(0, 0, 0, 0.03);
+  --bg-glass-strong: rgba(0, 0, 0, 0.06);
+  --text-primary: #1a1a2e;
+  --text-secondary: #4a4a6a;
+  --text-muted: #8888aa;
+  --text-dim: #b0b0c8;
+  --border: rgba(0, 0, 0, 0.08);
+  --border-light: rgba(0, 0, 0, 0.12);
+  --border-mint: rgba(45, 184, 138, 0.2);
+  --shadow-card: 0 8px 40px rgba(0, 0, 0, 0.08), 0 0 1px rgba(0, 0, 0, 0.1);
+  --mint: #2db88a;
+  --mint-dim: #1a9070;
+  --mint-glow: rgba(45, 184, 138, 0.2);
+  --mint-subtle: rgba(45, 184, 138, 0.06);
+  --mint-faint: rgba(45, 184, 138, 0.03);
+}
+
+html.theme-transitioning,
+html.theme-transitioning *,
+html.theme-transitioning *::before,
+html.theme-transitioning *::after {
+  transition: background-color 0.4s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease !important;
+}
+
+/* ===== Theme Toggle Button ===== */
+.theme-toggle {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all var(--t-fast);
+}
+.theme-toggle:hover {
+  background: var(--bg-glass-strong);
+  border-color: var(--border-mint);
+}
+.theme-toggle.rotating {
+  animation: iconSpin 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+@keyframes iconSpin {
+  0% { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(180deg) scale(1.2); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+
+/* ===== Light Theme Overrides for MiniPlayer ===== */
+[data-theme="light"] .mini-player {
+  background: rgba(248, 249, 250, 0.85);
+  border-top: 1px solid var(--border);
+}
+[data-theme="light"] .mini-player:hover {
+  background: rgba(248, 249, 250, 0.92);
+}
+
+/* ===== Button Beautification (Task 3) ===== */
+
+/* Universal button transition */
+button {
+  transition: all var(--t-fast);
+}
+
+/* Play control buttons */
+.ctrl-btn {
+  transition: all var(--t-fast);
+  border-radius: 50%;
+  backdrop-filter: blur(8px);
+}
+.ctrl-btn:hover {
+  transform: scale(1.15);
+  background: var(--mint-subtle);
+  color: var(--mint);
+}
+.ctrl-btn:active {
+  transform: scale(0.95);
+}
+.ctrl-btn.active-mode {
+  color: var(--mint);
+  text-shadow: 0 0 8px var(--mint-glow);
+}
+
+/* Extras / Search toggle button */
+.extras-btn {
+  border-radius: var(--radius-pill);
+  padding: 8px 20px;
+  background: var(--bg-glass);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  transition: all var(--t-fast);
+  font-size: 13px;
+  cursor: pointer;
+}
+.extras-btn:hover {
+  background: var(--mint-subtle);
+  color: var(--mint);
+  border-color: var(--border-mint);
+}
+
+/* Chat send button */
+.chat-send-btn {
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--mint);
+  color: var(--bg-deep);
+  border: none;
+  cursor: pointer;
+  transition: all var(--t-fast);
+  font-size: 16px;
+}
+.chat-send-btn:hover {
+  background: var(--mint-dim);
+  transform: scale(1.05);
+}
+.chat-send-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Volume slider */
+.volume-slider {
+  -webkit-appearance: none;
+  width: 80px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border);
+  outline: none;
+  transition: all var(--t-fast);
+}
+.volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--mint);
+  cursor: pointer;
+  transition: transform var(--t-fast);
+}
+.volume-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.3);
+}
+
+/* ===== Sync Favorites Button ===== */
+.sync-fav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-glass);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all var(--t-fast);
+}
+.sync-fav-btn:hover {
+  background: var(--mint-subtle);
+  color: var(--mint);
+  border-color: var(--border-mint);
+}
+.sync-fav-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ===== YRC Word Highlight ===== */
+.karaoke-char {
+  transition: color 0.1s ease, text-shadow 0.1s ease;
+}
+.karaoke-char.lit {
+  color: var(--mint);
+  text-shadow: 0 0 8px var(--mint-glow);
+}
+.karaoke-char.unlit {
+  color: var(--text-muted);
+}

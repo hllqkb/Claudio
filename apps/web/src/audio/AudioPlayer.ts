@@ -18,7 +18,6 @@ class AudioPlayerManager {
 
   constructor() {
     this.audio = new Audio();
-    this.audio.crossOrigin = "anonymous";
     this.audio.preload = "auto";
     this.audio.addEventListener("play", () => {
       this.pendingPlay = false;
@@ -27,8 +26,23 @@ class AudioPlayerManager {
     this.audio.addEventListener("pause", () => this.onPauseListeners.forEach((fn) => fn()));
     this.audio.addEventListener("ended", () => this.onEndedListeners.forEach((fn) => fn()));
     this.audio.addEventListener("error", () => {
-      console.warn("[audio] Error event:", this.audio.error);
+      const err = this.audio.error;
+      console.warn("[audio] Error event:", err ? `${err.code} - ${err.message}` : "unknown");
       this.onErrorListeners.forEach((fn) => fn());
+    });
+    this.audio.addEventListener("canplay", () => {
+      if (this.pendingPlay) {
+        this.audio.play().catch((err) => {
+          console.warn("[audio] canplay auto-play failed:", err);
+          this.pendingPlay = false;
+        });
+      }
+    });
+    this.audio.addEventListener("stalled", () => {
+      console.warn("[audio] Playback stalled");
+    });
+    this.audio.addEventListener("waiting", () => {
+      console.warn("[audio] Waiting for data...");
     });
     this.audio.addEventListener("timeupdate", () => {
       this.onTimeListeners.forEach((fn) => fn(this.audio.currentTime * 1000, this.audio.duration * 1000 || 0));

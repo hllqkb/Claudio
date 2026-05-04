@@ -1,4 +1,6 @@
 import cron, { type ScheduledTask } from "node-cron";
+import { readdir, stat } from "node:fs/promises";
+import { join } from "node:path";
 import type { ClaudeService } from "./claude.service.js";
 import type { ContextService } from "./context.service.js";
 
@@ -59,9 +61,35 @@ export class CronSchedulerService implements SchedulerService {
     );
 
     // 每小时检查缓存大小
+    const CACHE_THRESHOLD_MB = 500;
     this.tasks.push(
-      cron.schedule("0 * * * *", () => {
+      cron.schedule("0 * * * *", async () => {
         console.log("[scheduler] checking cache size...");
+        try {
+          const cacheDir = join(process.cwd(), "cache");
+          let totalBytes = 0;
+          const entries = await readdir(cacheDir, { withFileTypes: true });
+          for (const entry of entries) {
+            if (entry.isFile()) {
+              const s = await stat(join(cacheDir, entry.name));
+              totalBytes += s.size;
+            } else if (entry.isDirectory()) {
+              const subEntries = await readdir(join(cacheDir, entry.name));
+              for (const sub of subEntries) {
+                const s = await stat(join(cacheDir, entry.name, sub));
+                if (s.isFile()) totalBytes += s.size;
+              }
+            }
+          }
+          const sizeMB = Math.round(totalBytes / 1024 / 1024);
+          if (sizeMB > CACHE_THRESHOLD_MB) {
+            console.warn(`[scheduler] cache size ${sizeMB}MB exceeds threshold ${CACHE_THRESHOLD_MB}MB`);
+          } else {
+            console.log(`[scheduler] cache size: ${sizeMB}MB`);
+          }
+        } catch (err) {
+          console.error("[scheduler] cache check failed:", err);
+        }
       })
     );
 

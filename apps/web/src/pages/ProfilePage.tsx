@@ -4,6 +4,9 @@ import { useI18n } from "../i18n/context";
 import GenreChip from "../components/GenreChip";
 
 interface ProfileData {
+  totalPlays: number;
+  totalMinutes: number;
+  favoriteCount: number;
   topArtists: Array<{ name: string; count: number }>;
   decadeDistribution: Record<string, number>;
   languageDistribution: Record<string, number>;
@@ -11,23 +14,13 @@ interface ProfileData {
   recentThemes: string[];
 }
 
-const defaultGenres = [
-  "JAZZ-HIPHOP",
-  "NEO-CLASSICAL",
-  "90S华语",
-  "HIP-HOP",
-  "柴可夫斯基&EMINEM",
-  "J-ROCK",
-  "下雨白噪音",
-  "POST-PUNK",
-  "SHIBUYA-KEI",
-];
-
 function BarChart({ data }: { data: Record<string, number> }) {
+  const entries = Object.entries(data);
+  if (entries.length === 0) return null;
   const max = Math.max(...Object.values(data), 1);
   return (
     <div>
-      {Object.entries(data).map(([key, val]) => (
+      {entries.map(([key, val]) => (
         <div key={key} className="bar-row">
           <span className="bar-label">{key}</span>
           <div className="bar-track">
@@ -59,6 +52,7 @@ export default function ProfilePage() {
     );
   }
 
+  const hasData = profile.totalPlays > 0;
   const maxCount = Math.max(...profile.topArtists.map((a) => a.count), 1);
 
   return (
@@ -88,74 +82,93 @@ export default function ProfilePage() {
           {t("profileMotto2")}
         </div>
 
-        {/* Stats */}
+        {/* Stats Cards */}
         <div className="profile-stats">
           <div className="stat-cell">
-            <div className="stat-label">{t("onAirLabel")}</div>
-            <div className="stat-value">{t("onAirValue")}</div>
+            <div className="stat-value">{profile.totalPlays}</div>
+            <div className="stat-label">{t("totalPlays")}</div>
           </div>
           <div className="stat-cell">
-            <div className="stat-label">{t("genresLabel")}</div>
-            <div className="stat-value">{t("genresValue")}</div>
+            <div className="stat-value">{profile.totalMinutes}</div>
+            <div className="stat-label">{t("totalMinutes")}</div>
           </div>
           <div className="stat-cell">
-            <div className="stat-label">{t("listenerLabel")}</div>
-            <div className="stat-value">{t("listenerValue")}</div>
+            <div className="stat-value">{profile.favoriteCount}</div>
+            <div className="stat-label">{t("favoriteCount")}</div>
           </div>
         </div>
 
-        {/* Genre Chips */}
-        <div className="genre-chips">
-          {defaultGenres.map((g) => (
-            <GenreChip key={g} label={g} />
-          ))}
-        </div>
+        {/* Empty State */}
+        {!hasData && (
+          <div className="profile-section">
+            <div className="empty-state">{t("emptyProfile")}</div>
+          </div>
+        )}
 
-        {/* Top Artists */}
-        <div className="profile-section">
-          <div className="profile-section-title">{t("topArtists")}</div>
-          {profile.topArtists.map((a, i) => (
-            <div key={a.name} className="artist-row">
-              <span className="artist-rank">{i + 1}</span>
-              <span className="artist-name">{a.name}</span>
-              <div className="artist-bar">
-                <div
-                  className="artist-bar-fill"
-                  style={{ width: `${(a.count / maxCount) * 100}%` }}
-                />
-              </div>
-              <span className="artist-count">{a.count}x</span>
-            </div>
-          ))}
-        </div>
-
-        {/* Decades */}
-        <div className="profile-section">
-          <div className="profile-section-title">{t("decades")}</div>
-          <BarChart data={profile.decadeDistribution} />
-        </div>
-
-        {/* Languages */}
-        <div className="profile-section">
-          <div className="profile-section-title">{t("languages")}</div>
-          <BarChart data={profile.languageDistribution} />
-        </div>
-
-        {/* Mood */}
-        <div className="profile-section">
-          <div className="profile-section-title">{t("mood")}</div>
-          <BarChart data={profile.moodPreference} />
-        </div>
-
-        {/* Recent Themes */}
-        <div className="profile-section">
-          <div className="profile-section-title">{t("recentThemes")}</div>
-          <div className="tag-pills">
-            {profile.recentThemes.map((th) => (
-              <span key={th} className="tag-pill">{th}</span>
+        {/* Genre Chips — use moodPreference keys if available */}
+        {Object.keys(profile.moodPreference).length > 0 && (
+          <div className="genre-chips">
+            {Object.keys(profile.moodPreference).map((g) => (
+              <GenreChip key={g} label={g} />
             ))}
           </div>
-        </div>
+        )}
+
+        {/* Top Artists */}
+        {profile.topArtists.length > 0 && (
+          <div className="profile-section">
+            <div className="profile-section-title">{t("topArtists")}</div>
+            {profile.topArtists.map((a, i) => (
+              <div key={a.name} className="artist-row">
+                <span className="artist-rank">{i + 1}</span>
+                <span className="artist-name">{a.name}</span>
+                <div className="artist-bar">
+                  <div
+                    className="artist-bar-fill"
+                    style={{ width: `${(a.count / maxCount) * 100}%` }}
+                  />
+                </div>
+                <span className="artist-count">{a.count}x</span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Decades */}
+        {Object.keys(profile.decadeDistribution).length > 0 && (
+          <div className="profile-section">
+            <div className="profile-section-title">{t("decades")}</div>
+            <BarChart data={profile.decadeDistribution} />
+          </div>
+        )}
+
+        {/* Languages */}
+        {Object.keys(profile.languageDistribution).length > 0 && (
+          <div className="profile-section">
+            <div className="profile-section-title">{t("languages")}</div>
+            <BarChart data={profile.languageDistribution} />
+          </div>
+        )}
+
+        {/* Mood */}
+        {Object.keys(profile.moodPreference).length > 0 && (
+          <div className="profile-section">
+            <div className="profile-section-title">{t("mood")}</div>
+            <BarChart data={profile.moodPreference} />
+          </div>
+        )}
+
+        {/* Recent Themes */}
+        {profile.recentThemes.length > 0 && (
+          <div className="profile-section">
+            <div className="profile-section-title">{t("recentThemes")}</div>
+            <div className="tag-pills">
+              {profile.recentThemes.map((th) => (
+                <span key={th} className="tag-pill">{th}</span>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

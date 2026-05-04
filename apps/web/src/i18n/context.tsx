@@ -23,7 +23,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   const [lang, setLang] = useState<Lang>(getInitialLang);
 
   const t = useCallback(
-    (key: TranslationKey): string => translations[lang][key] ?? key,
+    (key: TranslationKey): string => (translations[lang] as Record<string, string | undefined>)[key] ?? key,
     [lang]
   );
 
