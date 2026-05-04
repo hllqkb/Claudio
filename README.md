@@ -1,238 +1,261 @@
-# Claudio - AI 音乐电台
+<div align="center">
 
-> 把多年歌单蒸馏成一个会看场景、会说话、会选歌的个人 AI 电台。
+# 🎵 Claudio — AI Music Radio
 
-Claudio 是一个本地化的 AI 音乐电台系统。导入网易云歌单后，Claude AI 根据你的口味、天气、日程和实时指令生成播放计划与 DJ 串词，再通过 TTS 合成语音播报，带来沉浸式电台体验。
+**你的私人 AI 音乐电台 · 看场景选歌 · 会说话的 DJ**
 
-## 截图
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)](https://react.dev/)
+[![Fastify](https://img.shields.io/badge/Fastify-5-000000?logo=fastify&logoColor=white)](https://fastify.dev/)
+[![pnpm](https://img.shields.io/badge/pnpm-workspace-F69220?logo=pnpm&logoColor=white)](https://pnpm.io/)
+[![PWA](https://img.shields.io/badge/PWA-Ready-5A0FC8?logo=googlechrome&logoColor=white)](https://web.dev/progressive-web-apps/)
+[![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 
-| 播放器 | 个人主页 |
-|:---:|:---:|
-| ![播放器](docs/images/screenshot-1.png) | ![个人主页](docs/images/screenshot-2.png) |
+把多年歌单蒸馏成一个会看场景、会说话、会选歌的个人 AI 电台。
 
-| 歌单浏览 | 设置 |
-|:---:|:---:|
-| ![歌单浏览](docs/images/screenshot-3.png) | ![设置](docs/images/screenshot-4.png) |
+Claudio 通过 Claude AI 根据你的口味、天气、时段和实时指令生成播放计划与 DJ 串词，再经 Fish Audio 合成语音播报，带来沉浸式电台体验。
 
-| 音频可视化 |
-|:---:|
-| ![音频可视化](docs/images/screenshot-5.png) |
+</div>
 
-## 特性
+---
 
-- **个性化推荐** — 基于歌单、口味规则、情绪规则和播放历史生成推荐
-- **场景感知** — 结合天气、日历、时间段动态调整音乐和播报
-- **AI DJ 串词** — Claude 自动生成主持词、天气提醒、日程提示、音乐介绍
-- **自然语言控制** — 输入"来点适合写代码的歌"即可调整播放风格
-- **网易云音乐** — 搜索、播放、歌词获取、歌单管理、灰色歌曲解锁
-- **PWA 播放器** — 响应式前端，支持桌面和移动端
-- **UPnP 投放** — 推送到家庭音响或局域网播放设备
-- **私有化部署** — 核心服务运行在本地，用户数据本地保存
+## ✨ Features
 
-## 技术栈
+| Feature | Description |
+|:---|:---|
+| 🤖 **AI DJ 串词** | Claude 自动生成主持词、天气提醒、音乐介绍，TTS 语音播报 |
+| 🎯 **场景感知** | 结合天气、时段、日程动态调整音乐风格和推荐 |
+| 💬 **自然语言点歌** | 输入「来点适合写代码的歌」即可调整播放风格 |
+| 🎶 **网易云音乐** | 搜索、播放、逐字歌词、歌单管理、灰色歌曲解锁 |
+| 🎨 **6 种音频可视化** | Glob / Flower / Arcs / Circles / Wave / Shine |
+| 📊 **实时频谱分析** | 对数频率映射 + 感知低频增强 + 峰值指示器 |
+| 🎤 **逐字歌词** | 网易云风格渐变扫描效果，rAF 驱动，零卡顿 |
+| 🌙 **深色/浅色主题** | 一键切换，全面适配 |
+| 📱 **PWA 支持** | 安装到桌面/手机，MediaSession 锁屏控制 |
+| 🔒 **本地私有化** | 核心服务运行在本地，数据全部本地保存 |
 
-| 层级 | 技术 |
-|------|------|
-| 前端 | React 19 + Vite + Zustand + PWA |
-| 后端 | Fastify + TypeScript + WebSocket |
-| 数据库 | SQLite (better-sqlite3) |
-| AI 编排 | Anthropic Claude API |
-| 音乐源 | 网易云音乐 + UnblockNeteaseMusic |
-| TTS | Fish Audio / Edge TTS |
-| 包管理 | pnpm workspace (monorepo) |
+---
 
-## 项目结构
+## 📸 Screenshots
+
+### 🎧 播放器 — 深色主题
+
+<div align="center">
+
+**待机状态 · 封面 + 歌词并排布局**
+
+<img src="docs/images/screenshot-player.png" width="800" alt="Player - Dark Theme">
+
+**播放状态 · Arcs 可视化 + 频谱条 + 逐字歌词渐变扫描**
+
+<img src="docs/images/screenshot-player-playing.png" width="800" alt="Player - Playing">
+
+</div>
+
+### 🤖 AI 对话 + 歌曲选择
+
+<div align="center">
+
+**左侧 AI 对话侧边栏 · 中间播放器 · 右侧歌曲选择**
+
+<img src="docs/images/screenshot-ai-chat.png" width="800" alt="AI Chat Sidebar">
+
+</div>
+
+### 📋 其他页面
+
+<div align="center">
+
+| 歌单浏览 | 播放历史 | 个人品味 |
+|:---:|:---:|:---:|
+| <img src="docs/images/screenshot-ncm-playlist.png" width="260" alt="Playlist"> | <img src="docs/images/screenshot-history.png" width="260" alt="History"> | <img src="docs/images/screenshot-profile.png" width="260" alt="Profile"> |
+
+</div>
+
+<div align="center">
+
+| 浅色主题 | 设置页面 | 歌曲选择 |
+|:---:|:---:|:---:|
+| <img src="docs/images/screenshot-light-theme.png" width="260" alt="Light Theme"> | <img src="docs/images/screenshot-settings.png" width="260" alt="Settings"> | <img src="docs/images/screenshot-song-sidebar.png" width="260" alt="Song Sidebar"> |
+
+</div>
+
+---
+
+## 🏗️ Architecture
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    Frontend (React 19 + Vite)            │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌─────────┐ │
+│  │ Player   │  │ Playlist │  │ Profile  │  │Settings │ │
+│  │ Page     │  │ Page     │  │ Page     │  │ Page    │ │
+│  └────┬─────┘  └──────────┘  └──────────┘  └─────────┘ │
+│       │    Zustand Store · WebSocket · AudioPlayer      │
+│       │    KaraokeLyrics · AudioVisualizer · SpectrumBars│
+└───────┼─────────────────────────────────────────────────┘
+        │ HTTP + WebSocket
+┌───────┴─────────────────────────────────────────────────┐
+│                  Backend (Fastify + TypeScript)           │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌─────────┐ │
+│  │ Claude   │  │ NCM      │  │ Fish     │  │Weather  │ │
+│  │ AI Plan  │  │ Music    │  │ Audio    │  │Service  │ │
+│  └──────────┘  └──────────┘  └──────────┘  └─────────┘ │
+│            SQLite (better-sqlite3) · TTS · Scheduler     │
+└─────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- **Node.js** >= 18
+- **pnpm** >= 9
+- **网易云音乐** 账号（Cookie）
+
+### 安装 & 启动
+
+```bash
+# 克隆仓库
+git clone https://github.com/hllqkb/Claudio.git
+cd Claudio
+
+# 安装依赖
+pnpm install
+
+# 配置环境变量
+cp apps/server/.env.example apps/server/.env
+# 编辑 .env，填入 API Key 等配置
+
+# 一键启动 🎵
+./start.sh
+```
+
+启动后访问:
+- **前端**: http://localhost:5173
+- **后端**: http://localhost:8080
+- **NCM 代理**: http://localhost:3000
+
+### 环境变量
+
+| 变量 | 说明 | 必填 |
+|:---|:---|:---:|
+| `ANTHROPIC_API_KEY` | Claude AI API Key | ✅ |
+| `ANTHROPIC_BASE_URL` | Claude API Base URL | ✅ |
+| `FISH_AUDIO_API_KEY` | Fish Audio TTS API Key | ✅ |
+| `FISH_AUDIO_VOICE_ID` | TTS 语音音色 ID | ✅ |
+| `NETEASE_COOKIE` | 网易云音乐 Cookie | ✅ |
+| `WEATHER_API_KEY` | OpenWeather API Key | ❌ |
+| `CITY` | 天气城市（默认 Shanghai） | ❌ |
+
+---
+
+## 📁 Project Structure
 
 ```
 Claudio/
 ├── apps/
-│   ├── server/              # 后端服务
+│   ├── server/                    # Fastify 后端
 │   │   ├── src/
-│   │   │   ├── routes/      # API 路由 (now, plan, player, intent, stream, media, settings, profile, playlist, cover, lyric, ncm-playlists)
-│   │   │   ├── services/    # 业务服务 (claude, ncm, tts, weather, calendar, upnp, scheduler, context, playlist)
-│   │   │   ├── db/          # 数据库层 (settings, playlist, plays)
-│   │   │   ├── helpers/     # 工具函数
-│   │   │   ├── prompts/     # Claude system prompt
-│   │   │   └── config.ts    # 配置加载
-│   │   └── package.json
-│   └── web/                 # 前端 PWA
+│   │   │   ├── routes/            # API 路由
+│   │   │   ├── services/          # 业务逻辑 (NCM, Claude, TTS, Weather)
+│   │   │   ├── db/                # SQLite 数据仓库
+│   │   │   ├── config.ts          # 配置管理
+│   │   │   └── index.ts           # 入口
+│   │   └── .env                   # 环境变量
+│   └── web/                       # React 前端
 │       ├── src/
-│       │   ├── components/  # UI 组件 (PlayerControls, QueueList, LyricsPanel, KaraokeLyrics, AudioVisualizer, ChatArea, DjMessages, MiniPlayer, IntentInput, GenreChip, AudioSpectrum, WaveformBar, TranscriptPanel)
-│       │   ├── pages/       # 页面 (Player, Profile, Settings, Playlist)
-│       │   ├── stores/      # Zustand 状态管理
-│       │   ├── api/         # API 客户端 + WebSocket
-│       │   └── audio/       # 音频播放器
-│       └── package.json
-├── user/                    # 用户画像 (taste, routines, mood-rules)
-├── package.json             # 根配置
-└── pnpm-workspace.yaml      # pnpm 工作区
+│       │   ├── pages/             # 页面 (Player, Playlist, Profile, Settings, History)
+│       │   ├── components/        # UI 组件
+│       │   │   ├── KaraokeLyrics.tsx    # 逐字歌词（渐变扫描）
+│       │   │   ├── AudioVisualizer.tsx  # 6种音频可视化
+│       │   │   ├── SpectrumBars.tsx     # 实时频谱分析
+│       │   │   ├── ParticleCanvas.tsx   # 粒子特效
+│       │   │   ├── ChatArea.tsx         # AI 对话
+│       │   │   └── ...
+│       │   ├── stores/            # Zustand 状态管理
+│       │   ├── audio/             # AudioPlayer 引擎
+│       │   ├── api/               # API 客户端 + WebSocket
+│       │   ├── i18n/              # 国际化 (中/英)
+│       │   └── styles/            # 全局 CSS
+│       └── vite.config.ts
+├── start.sh                       # 一键启动脚本
+├── CLAUDE.md                      # Claude Code 项目规范
+└── pnpm-workspace.yaml
 ```
 
-## 快速开始
+---
 
-### 环境要求
+## 🎨 Design System
 
-- Node.js >= 20
-- pnpm >= 9
-- 网易云音乐账号（可选）
-- Anthropic API Key
-- Fish Audio API Key（TTS）
+| Token | Dark | Light |
+|:---|:---|:---|
+| Primary | `#5ee8c5` | `#0d9488` |
+| Background | `#0a0a0f` | `#f8f9fa` |
+| Card | `rgba(255,255,255,0.04)` | `rgba(0,0,0,0.02)` |
+| Text Primary | `#e2e8f0` | `#1a1a2e` |
+| Text Secondary | `#94a3b8` | `#64748b` |
+| Border | `rgba(255,255,255,0.06)` | `rgba(0,0,0,0.08)` |
 
-### 安装
+---
+
+## 🛠️ Tech Stack
+
+| Layer | Technology |
+|:---|:---|
+| **Frontend** | React 19 · Vite · Zustand · PWA · TypeScript |
+| **Backend** | Fastify · WebSocket · TypeScript |
+| **Database** | SQLite (better-sqlite3) |
+| **AI** | Anthropic Claude API |
+| **Music** | 网易云音乐 + UnblockNeteaseMusic |
+| **TTS** | Fish Audio / Edge TTS |
+| **Package** | pnpm workspace (monorepo) |
+
+---
+
+## 📖 Key Concepts
+
+### 🎤 Karaoke Lyrics
+逐字歌词使用 `background-clip: text` + CSS `--progress` 变量实现网易云风格渐变扫描效果。rAF 驱动的直接 DOM 更新确保零 React 重渲染，丝滑不卡顿。
+
+### 📊 Spectrum Bars
+实时频谱分析采用对数频率映射（perceptually correct），感知低频增强算法补偿人耳低频灵敏度差异，快速上升 (attack 0.5) + 缓慢下降 (release 0.88) 的平滑策略。
+
+### 🤖 AI Planning
+Claude AI 根据当前场景（天气/时段/用户偏好）生成播放计划，自动插入 DJ 串词，通过 Fish Audio 合成自然语音播报。
+
+---
+
+## 🤝 Contributing
 
 ```bash
-git clone https://github.com/hllqkb/Claudio.git
-cd Claudio
-pnpm install
-```
-
-### 配置
-
-```bash
-cd apps/server
-cp .env.example .env
-```
-
-编辑 `.env` 填入以下配置：
-
-```env
-ANTHROPIC_API_KEY=your_claude_api_key
-FISH_AUDIO_API_KEY=your_tts_key
-NCM_PHONE=your_phone        # 网易云手机号（可选）
-NCM_PASSWORD=your_password   # 网易云密码（可选）
-PORT=8080
-```
-
-### 一键启动
-
-```bash
-./start.sh
-```
-
-自动启动 NCM API 服务 + 前后端 dev server，`Ctrl+C` 停止所有服务。
-
-### 开发
-
-```bash
-# 同时启动前端和后端（不含 NCM 代理）
+# 开发模式启动
 pnpm dev
 
-# 单独启动后端
-pnpm --filter @ai-radio/server dev
+# 构建
+pnpm --filter @ai-radio/web build
+pnpm --filter @ai-radio/server build
 
-# 单独启动前端
-pnpm --filter @ai-radio/web dev
-
-# 单独启动 NCM 代理
-node apps/server/ncm-server.mjs
+# 代码规范
+# - TypeScript strict mode
+# - 4-space indent
+# - Conventional Commits (feat:, fix:, docs:, chore:)
 ```
 
-- 后端 API：http://localhost:8080
-- 前端页面：http://localhost:5173
-- NCM 代理：http://localhost:3000
+---
 
-### 构建
+## 📄 License
 
-```bash
-pnpm build
-```
+MIT © [hllqkb](https://github.com/hllqkb)
 
-## 使用方式
+---
 
-1. 打开 PWA 播放器
-2. 在设置页配置 API Key 和网易云信息
-3. 输入自然语言指令，如"来点轻松的爵士乐"
-4. 或等待系统根据时间、天气自动生成播放计划
+<div align="center">
 
-## 开发规范
+**Made with ❤️ and AI**
 
-### Commit 规范
+[GitHub](https://github.com/hllqkb/Claudio) · [Report Bug](https://github.com/hllqkb/Claudio/issues) · [Request Feature](https://github.com/hllqkb/Claudio/issues)
 
-使用 [Conventional Commits](https://www.conventionalcommits.org/) 格式：
-
-```
-<type>(<scope>): <description>
-
-[optional body]
-[optional footer]
-```
-
-**Type 类型：**
-
-| 类型 | 说明 |
-|------|------|
-| `feat` | 新功能 |
-| `fix` | 修复 bug |
-| `docs` | 文档变更 |
-| `style` | 代码格式（不影响逻辑） |
-| `refactor` | 重构（既非新功能也非修复） |
-| `perf` | 性能优化 |
-| `test` | 测试相关 |
-| `chore` | 构建/工具/依赖变更 |
-| `ci` | CI 配置变更 |
-
-**Scope 范围：**
-
-`server`, `web`, `db`, `config`, `deps`
-
-**示例：**
-
-```
-feat(server): 添加歌单管理和播放历史记录
-fix(web): 修复歌词面板滚动定位不准的问题
-feat(web): 新增卡拉 OK 歌词显示和 DJ 串词面板
-refactor(server): 拆分 playlist 和 plays 为独立 repo
-chore(deps): 升级 fastify 到 v5.3
-```
-
-### 分支规范
-
-| 分支 | 用途 |
-|------|------|
-| `main` | 稳定版本，保护分支 |
-| `develop` | 开发主线 |
-| `feat/*` | 功能分支，如 `feat/playlist-management` |
-| `fix/*` | 修复分支，如 `fix/lyrics-scroll` |
-| `docs/*` | 文档分支 |
-
-### PR 规范
-
-1. 从 `develop` 创建功能分支
-2. 开发完成后提交 PR 到 `develop`
-3. PR 标题遵循 Commit 规范格式
-4. 描述中说明改动内容和测试方式
-5. 至少一个 reviewer 通过后合并
-
-## 贡献指南
-
-1. Fork 本仓库
-2. 创建功能分支：`git checkout -b feat/my-feature`
-3. 提交改动：`git commit -m 'feat(server): 添加某功能'`
-4. 推送分支：`git push origin feat/my-feature`
-5. 创建 Pull Request
-
-### 开发环境设置
-
-```bash
-pnpm install
-pnpm lint      # 类型检查
-pnpm build     # 构建验证
-```
-
-### 代码风格
-
-- TypeScript 严格模式
-- 4 空格缩进
-- 使用 ESLint + Prettier
-- 提交前确保 `pnpm lint` 通过
-
-## 许可证
-
-本项目基于 [MIT License](./LICENSE) 开源。
-
-## 致谢
-
-- [Anthropic Claude](https://www.anthropic.com/) — AI 编排引擎
-- [网易云音乐](https://music.163.com/) — 音乐数据源
-- [UnblockNeteaseMusic](https://github.com/UnblockNeteaseMusic/server) — 灰色歌曲解锁
-- [Fish Audio](https://fish.audio/) — TTS 语音合成
+</div>

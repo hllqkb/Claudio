@@ -184,7 +184,7 @@ function parseLyrics(lrc: string, tlyric?: string, yrc?: string): ParsedLine[] {
       );
       if (enhancedLines.length > 0) {
         const translationMap = parseTranslationMap(tlyric);
-        const METADATA_RE = /^(作词|作曲|编曲|制作人|录音|混音|母带|吉他|贝斯|鼓|键盘|弦乐|大提琴|小提琴|钢琴|和声|和音|词|曲|演唱|演奏|后期|封面|美工|翻译|文案|出品|监制|企划|统筹|宣传|发行)\s*[:：]/;
+        const METADATA_RE = /^(作词|作曲|编曲|制作人|录音|混音|母带|吉他|贝斯|鼓|键盘|弦乐|大提琴|小提琴|钢琴|和声|和音|词|曲|演唱|演奏|后期|封面|美工|翻译|文案|出品|监制|企划|统筹|宣传|发行|出品人|弦乐编写|和声编写|录音师|录音棚|混音\/母带|杜比全景声|制作统筹|出品公司|音乐总监|声乐指导|器乐|编曲人|制作人助理|混音师|母带师|录音助理|发行公司).*[:：]/;
         const realEnhanced = enhancedLines.filter((line) => !METADATA_RE.test(line.content.trim()));
         return realEnhanced.map((line) => ({
           startMs: line.startMillisecond,
@@ -204,7 +204,7 @@ function parseLyrics(lrc: string, tlyric?: string, yrc?: string): ParsedLine[] {
     (l): l is LyricLine => l.type === LineType.LYRIC
   );
 
-  const METADATA_RE = /^(作词|作曲|编曲|制作人|录音|混音|母带|吉他|贝斯|鼓|键盘|弦乐|大提琴|小提琴|钢琴|和声|和音|词|曲|演唱|演奏|后期|封面|美工|翻译|文案|出品|监制|企划|统筹|宣传|发行)\s*[:：]/;
+  const METADATA_RE = /^(作词|作曲|编曲|制作人|录音|混音|母带|吉他|贝斯|鼓|键盘|弦乐|大提琴|小提琴|钢琴|和声|和音|词|曲|演唱|演奏|后期|封面|美工|翻译|文案|出品|监制|企划|统筹|宣传|发行|出品人|弦乐编写|和声编写|录音师|录音棚|混音\/母带|杜比全景声|制作统筹|出品公司|音乐总监|声乐指导|器乐|编曲人|制作人助理|混音师|母带师|录音助理|发行公司).*[:：]/;
 
   const realLines = lyricLines.filter((line) => !METADATA_RE.test(line.content.trim()));
 
